@@ -37,8 +37,10 @@ function Platoon({ platoonNum }: { platoonNum: number }) {
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel3-content"
           id="panel3-header"
+          sx={{ display: "flex", flexDirection:"row", alignItems: "center", justifyContent: "space-between" }}
         >
-          {`platoon ${platoonNum}`}
+          <Checkbox color="primary.main" />
+          <div style={{ alignSelf: "center" }}>{`Platoon ${platoonNum}`}</div>
         </AccordionSummary>
         <AccordionDetails sx={{padding: "6px 60px 6px 20px"}}>
           <Stack spacing={1} sx={{ width: "100%" }}>

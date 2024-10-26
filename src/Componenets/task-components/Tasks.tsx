@@ -18,7 +18,10 @@ function Tasks() {
     } else if (value === 3) {
       setCurrentDateString("Tomorrow");
     } else {
-      setCurrentDateString(today.toString());
+      const day = today.getDay();
+      const month = today.getMonth();
+      const year = today.getFullYear();
+      setCurrentDateString(`${day}/${month}/${year}`);
     }
   }
 
@@ -26,7 +29,6 @@ function Tasks() {
 
   return (
     <Box width={"100%"} display={"flex"} flexDirection={'column'} alignItems={'center'}>
-      {/* Add a filter by date */}
       <Typography variant="h4">Tasks</Typography> 
       <Typography variant="h6">{currentDateString}</Typography>
         {companyContext.company.taskInstances.filter((task_instance) => {
