@@ -8,14 +8,11 @@ export const predefinedTasks: Task[] = [
 
 // generate task instance for yeterday today and the next 6 days
 export const generateMissingTaskInstances = (existingTaskInstances: TaskInstance[]) => {
-    const today = new Date(); 
     let taskInstances = existingTaskInstances;
 
     for (let i = -1; i <= 6; i++) {
-        const date = new Date(today);
-        date.setDate(today.getDate() + i);
-        console.log("task instances " + i);
-        console.log(taskInstances);
+        const date = new Date();
+        date.setDate(date.getDate() + i);
         if (taskInstances.find((taskInstance) => taskInstance.startTime.getDate() === date.getDate()) === undefined) {
             taskInstances = taskInstances.concat(predefinedTasks.map((task) => new TaskInstance(task, date, 4, []))); 
         }

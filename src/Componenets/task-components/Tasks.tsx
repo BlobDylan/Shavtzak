@@ -9,9 +9,8 @@ function Tasks() {
 
   const handlePageChange = (_event: React.ChangeEvent<unknown>, value: number) => {
     const today = new Date();
-    const adjustedDate = new Date(today);
-    adjustedDate.setDate(today.getDate() + value - 2); // Adjust date based on value
-    setCurrentDate(adjustedDate);
+    today.setDate(today.getDate() + value - 2); 
+    setCurrentDate(today);
     if (value === 1) {
       setCurrentDateString("Yesterday");
     } else if (value === 2) {
@@ -19,21 +18,19 @@ function Tasks() {
     } else if (value === 3) {
       setCurrentDateString("Tomorrow");
     } else {
-      setCurrentDateString(adjustedDate.toString());
+      setCurrentDateString(today.toString());
     }
   }
 
   const companyContext = useCompanyContext() as CompanyContextType;
-  // For Debugging: remove later
-  // console.log(companyContext.company.taskInstances)
 
   return (
-    <Box>
+    <Box width={"100%"} display={"flex"} flexDirection={'column'} alignItems={'center'}>
       {/* Add a filter by date */}
       <Typography variant="h4">Tasks</Typography> 
       <Typography variant="h6">{currentDateString}</Typography>
         {companyContext.company.taskInstances.filter((task_instance) => {
-          return task_instance.startTime.getDay() === currentDate.getDay();
+          return task_instance.startTime.getDate() === currentDate.getDate();
         }).map((taskInstance, index) => <Task key={index} taskInstance={taskInstance} />)}
       <Stack spacing={2} display={"flex"} alignItems={"center"}>
         <Pagination count={8} variant="outlined" shape="rounded" sx={{ backgroundColor: "primary.main"}} onChange={handlePageChange}/>

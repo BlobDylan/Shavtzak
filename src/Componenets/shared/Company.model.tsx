@@ -10,7 +10,7 @@ export class Company {
     constructor(soldiers: Soldier[], tasks: Task[], taskInstances: TaskInstance[]){
         this.soldiers = soldiers;
         this.tasks = tasks;
-        // this.taskInstances = generateMissingTaskInstances(taskInstances);
-        this.taskInstances = taskInstances;
+        this.taskInstances = generateMissingTaskInstances(taskInstances);
+        // this.taskInstances = taskInstances;
     }
 }

@@ -59,17 +59,15 @@ function SoldierViewComponent(props:{soldier: Soldier}) {
     const companyContext = useCompanyContext() as CompanyContextType;
 
     return (
-        <div ref={drag} style={style}>
-            <Box ref={drag} display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" sx={{borderRadius: "10px", border: "1px solid white", padding: "0.5rem"}}>
-                <div>
-                    <Typography variant="body1">{props.soldier.name}</Typography>
-                    <Typography variant="body2">{prettyPrintRoles(props.soldier.roles)}</Typography>
-                </div>
-                <IconButton onClick={() => companyContext.deleteSoldier(props.soldier)}>
-                    <DeleteIcon />
-                </IconButton>
-            </Box>
-        </div>
+        <Box ref={drag} width={"100%"} display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" sx={{borderRadius: "10px", border: "1px solid white", padding: "0.5rem"}}>
+            <div>
+                <Typography variant="body1">{props.soldier.name}</Typography>
+                <Typography variant="body2">{prettyPrintRoles(props.soldier.roles)}</Typography>
+            </div>
+            <IconButton onClick={() => companyContext.deleteSoldier(props.soldier)}>
+                <DeleteIcon />
+            </IconButton>
+        </Box>
     );
 }
 

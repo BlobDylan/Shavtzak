@@ -16,6 +16,7 @@ function LeftPaneContainer() {
       flexDirection={"column"}
       alignItems={"center"}
       sx={{ padding: "1rem" }}
+      width = "100%"
     >
       <Stack spacing={1} sx={{ width: "100%" }}>
         <Typography variant="h3">Pluga B</Typography>

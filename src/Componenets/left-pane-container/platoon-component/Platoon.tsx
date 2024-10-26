@@ -40,7 +40,7 @@ function Platoon({ platoonNum }: { platoonNum: number }) {
         >
           {`platoon ${platoonNum}`}
         </AccordionSummary>
-        <AccordionDetails>
+        <AccordionDetails sx={{padding: "6px 60px 6px 20px"}}>
           <Stack spacing={1} sx={{ width: "100%" }}>
             {companyContext.company.soldiers.filter((s) => s.platoon === platoonNum).map((soldier : Soldier) => (
                 <div key={soldier.name}>

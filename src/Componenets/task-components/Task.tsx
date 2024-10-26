@@ -19,8 +19,6 @@ export const ItemTypes = {
 export const Task: FC<{ taskInstance: TaskInstance}> = ({ taskInstance }) => {
   const companyContext = useCompanyContext() as CompanyContextType
 
-  const [hasDropped, setHasDropped] = useState(false)
-
   const [{ isOverCurrent }, drop] = useDrop(
     () => ({
       accept: ItemTypes.SOLDIER,
@@ -31,14 +29,13 @@ export const Task: FC<{ taskInstance: TaskInstance}> = ({ taskInstance }) => {
         if (didDrop) {
           return
         }
-        setHasDropped(true)
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
         isOverCurrent: monitor.isOver({ shallow: true }),
       }),
     }),
-    [setHasDropped],
+    [],
   )
 
   let backgroundColor = 'rgba(0, 0, 0, .5)'
@@ -64,12 +61,9 @@ export const Task: FC<{ taskInstance: TaskInstance}> = ({ taskInstance }) => {
         <Stack direction={"row"} spacing={2}>
           {taskInstance.task.roles.map((role, index) => <Typography key={index} variant={"body2"}>{role}</Typography>)}
         </Stack>
-        {taskInstance.assignedSoldiers.map((soldier, index) => <Typography key={index} variant={"body2"}>{soldier.name}</Typography>)}
-      {hasDropped && 
-        <Stack direction={"row"}>
-          {/* {taskInstance.assignedSoldiers.map((soldier, index) => <Typography key={index} variant={"body2"}>{soldier.name}</Typography>)} */}
+        <Stack direction={"row"} spacing={2}>
+          {taskInstance.assignedSoldiers.map((soldier, index) => <Typography key={index} variant={"body2"}>{soldier.name}</Typography>)}
         </Stack>
-      }
     </Box>
   )
 }
