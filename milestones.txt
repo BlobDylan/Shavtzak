@@ -1,0 +1,37 @@
+1) drag and drop:
+    - list of people, list of tasks, drag and drop between them (data and ui)
+    - new tasks, new people
+    - delete people
+    - list of people each person has (name(ID), platoon, roles)
+
+    models:
+        - soldier: (name(id), platton, roles(list))
+        - task: (name(id), roles, start time, end time, assigned soildiers (list), starting day(int 1-7))
+    ===============================================================
+
+2) Model validation
+    validator task:
+    -valid and unique name
+    -valid start time end time (00:00 - 23:59)
+    -starting day
+    -roles not empty
+    -valid roles
+    -assigned soldiers in existing soldiers
+
+   validator soldier:
+    -uniqueness of name
+    -valid roles
+    -at least one role
+    -platoon is required
+    -name not empty
+
+====================================================
+
+3) Rules validator:
+
+    -hardcoded rules
+    -red , green, orange - ok, not filled, warning
+
+4) Full product:
+    -ui/ux
+    -make it easy to work with
