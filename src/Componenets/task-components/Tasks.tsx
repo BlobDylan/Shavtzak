@@ -18,10 +18,11 @@ function Tasks() {
     } else if (value === 3) {
       setCurrentDateString("Tomorrow");
     } else {
+      const dayname = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
       const day = today.getDay();
       const month = today.getMonth();
       const year = today.getFullYear();
-      setCurrentDateString(`${day}/${month}/${year}`);
+      setCurrentDateString(dayname[day] + ", " + month + "/" + year);
     }
   }
 

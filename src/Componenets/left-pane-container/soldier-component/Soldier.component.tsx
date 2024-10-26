@@ -4,6 +4,7 @@ import {
     Typography,
     Box,
     IconButton,
+    Stack,
     Checkbox,
 } from "@mui/material";
 
@@ -19,11 +20,11 @@ function SoldierViewComponent(props:{soldier: Soldier}) {
 
     return (
         <Box ref={drag} width={"100%"} display="flex" flexDirection="row" alignItems="center" justifyContent="space-between" sx={{borderRadius: "10px", border: "1px solid white", padding: "0.5rem"}}>
-            <Checkbox color="primary.main"/> 
-            <div>
+            <Checkbox color='primary.main'/> 
+            <Stack display={"flex"} flexDirection={"column"} alignItems={"center"} justifyContent={"space-between"}>
                 <Typography variant="body1">{props.soldier.name}</Typography>
                 <Typography variant="body2">{prettyPrintRoles(props.soldier.roles)}</Typography>
-            </div>
+            </Stack>
             <IconButton onClick={() => companyContext.deleteSoldier(props.soldier)}>
                 <DeleteIcon />
             </IconButton>
