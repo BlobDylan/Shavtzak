@@ -1,26 +1,29 @@
-import type { FC } from 'react'
-import { useState } from 'react'
-import { useDrop } from 'react-dnd'
-import { Box, Typography, Stack } from '@mui/material'
-import { TaskInstance } from '../shared/Task.model'
-import { Soldier } from '../shared/Soldier.model'
-import { useCompanyContext, CompanyContextType} from '../../contexts/Company.ctx'
-import DeleteIcon from '@mui/icons-material/Delete';
+import type { FC } from "react";
+import { useState } from "react";
+import { useDrop } from "react-dnd";
+import { Box, Typography, Stack } from "@mui/material";
+import { TaskInstance } from "../shared/Task.model";
+import { Soldier } from "../shared/Soldier.model";
+import {
+  useCompanyContext,
+  CompanyContextType,
+} from "../../contexts/Company.ctx";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export interface DustbinState {
-  hasDropped: boolean
-  hasDroppedOnChild: boolean
+  hasDropped: boolean;
+  hasDroppedOnChild: boolean;
 }
 
 export const ItemTypes = {
-    SOLDIER: 'soldier',
-}
+  SOLDIER: "soldier",
+};
 
-export const Task: FC<{ taskInstance: TaskInstance}> = ({ taskInstance }) => {
-  const companyContext = useCompanyContext() as CompanyContextType
+export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
+  const companyContext = useCompanyContext() as CompanyContextType;
 
   return (
-    <Box  
+    <Box
       sx={{
         width: "500px",
         height: "100px",
@@ -34,42 +37,49 @@ export const Task: FC<{ taskInstance: TaskInstance}> = ({ taskInstance }) => {
         justifyContent: "space-around",
       }}
     >
-      <Stack direction={"column"} display={"flex"} alignItems={'center'}>
-        <Typography variant={"body1"} color='white' marginTop={2}>{taskInstance.task.type}</Typography>
+      <Stack direction={"column"} display={"flex"} alignItems={"center"}>
+        <Typography variant={"body1"} color="white" marginTop={2}>
+          {taskInstance.task.type}
+        </Typography>
         <Stack direction={"row"} spacing={2} margin={2} marginBottom={3}>
           {taskInstance.task.roles.map((role, index) => {
             const [isHovered, setIsHovered] = useState(false);
-            const [{isOverCurrent}, drop] = useDrop(() => ({
-              accept: ItemTypes.SOLDIER,
-              drop(_item: unknown, monitor) {
-                const didDrop = monitor.didDrop()
-                const item = monitor.getItem()
+            const [{ isOverCurrent }, drop] = useDrop(
+              () => ({
+                accept: ItemTypes.SOLDIER,
+                drop(_item: unknown, monitor) {
+                  const didDrop = monitor.didDrop();
+                  const item = monitor.getItem();
 
-                companyContext.assignSoldierToTaskInstance(item as Soldier, role, taskInstance) 
-                if (didDrop) {
-                  return
-                }
-              },
-              collect: (monitor) => ({
-                isOver: monitor.isOver(),
-                isOverCurrent: monitor.isOver({ shallow: true }),
+                  companyContext.assignSoldierToTaskInstance(
+                    item as Soldier,
+                    role,
+                    taskInstance
+                  );
+                  if (didDrop) {
+                    return;
+                  }
+                },
+                collect: (monitor) => ({
+                  isOver: monitor.isOver(),
+                  isOverCurrent: monitor.isOver({ shallow: true }),
+                }),
               }),
-            }),
-            [],
-          )
-          let backgroundColor = 'white'
+              []
+            );
+            let backgroundColor = "white";
 
-          if (isOverCurrent){
-            backgroundColor = 'darkgreen'
-          } else if (isHovered && taskInstance.assignedSoldiers[index]) {
-            backgroundColor = 'red'
-          }
+            if (isOverCurrent) {
+              backgroundColor = "darkgreen";
+            } else if (isHovered && taskInstance.assignedSoldiers[index]) {
+              backgroundColor = "red";
+            }
 
-          return(
-            <Stack 
+            return (
+              <Stack
                 width={"100px"}
                 height={"50px"}
-                border={"3px dashed"} 
+                border={"3px dashed"}
                 borderColor={backgroundColor}
                 borderRadius={"10px"}
                 display={"flex"}
@@ -79,25 +89,38 @@ export const Task: FC<{ taskInstance: TaskInstance}> = ({ taskInstance }) => {
                 ref={drop}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
-                sx={{cursor: taskInstance.assignedSoldiers[index] ? "pointer" : "default"}}
+                sx={{
+                  cursor: taskInstance.assignedSoldiers[index]
+                    ? "pointer"
+                    : "default",
+                }}
               >
-              {(isHovered && taskInstance.assignedSoldiers[index]) && <DeleteIcon sx={{color:"text.primary"}} onClick={() => companyContext.removeSoldierFromTaskInstance(taskInstance.assignedSoldiers[index], taskInstance)} />}
-                {(!isHovered || !taskInstance.assignedSoldiers[index]) && 
-                  <Typography 
-                    key={index} 
-                    variant={"body2"} 
-                    color={"white"}
-                    >
-                      {role}
+                {isHovered && taskInstance.assignedSoldiers[index] && (
+                  <DeleteIcon
+                    sx={{ color: "text.primary" }}
+                    onClick={() =>
+                      companyContext.removeSoldierFromTaskInstance(
+                        taskInstance.assignedSoldiers[index],
+                        taskInstance
+                      )
+                    }
+                  />
+                )}
+                {(!isHovered || !taskInstance.assignedSoldiers[index]) && (
+                  <Typography key={index} variant={"body2"} color={"white"}>
+                    {role}
                   </Typography>
-                }
-              <Typography color={"white"}>
-                {(!isHovered && taskInstance.assignedSoldiers[index]) && taskInstance.assignedSoldiers[index].name }
-              </Typography>
-            </Stack>
-          )})}
+                )}
+                <Typography color={"white"}>
+                  {!isHovered &&
+                    taskInstance.assignedSoldiers[index] &&
+                    taskInstance.assignedSoldiers[index].name}
+                </Typography>
+              </Stack>
+            );
+          })}
         </Stack>
       </Stack>
     </Box>
-  )
-}
+  );
+};

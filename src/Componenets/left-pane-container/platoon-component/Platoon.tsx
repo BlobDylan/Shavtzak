@@ -23,7 +23,10 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import SoldierViewComponent from "../soldier-component/Soldier.component";
 import { Soldier } from "../../shared/Soldier.model";
-import { CompanyContextType, useCompanyContext } from "../../../contexts/Company.ctx";
+import {
+  CompanyContextType,
+  useCompanyContext,
+} from "../../../contexts/Company.ctx";
 import { SoldierRole } from "../../shared/SoldierRole.enum";
 
 function Platoon({ platoonNum }: { platoonNum: number }) {
@@ -37,18 +40,25 @@ function Platoon({ platoonNum }: { platoonNum: number }) {
           expandIcon={<ExpandMoreIcon />}
           aria-controls="panel3-content"
           id="panel3-header"
-          sx={{ display: "flex", flexDirection:"row", alignItems: "center", justifyContent: "space-between" }}
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
         >
           <Checkbox color="primary.main" />
           <div style={{ alignSelf: "center" }}>{`Platoon ${platoonNum}`}</div>
         </AccordionSummary>
-        <AccordionDetails sx={{padding: "6px 60px 6px 20px"}}>
+        <AccordionDetails sx={{ padding: "6px 60px 6px 20px" }}>
           <Stack spacing={1} sx={{ width: "100%" }}>
-            {companyContext.company.soldiers.filter((s) => s.platoon === platoonNum).map((soldier : Soldier) => (
+            {companyContext.company.soldiers
+              .filter((s) => s.platoon === platoonNum)
+              .map((soldier: Soldier) => (
                 <div key={soldier.name}>
-                    <SoldierViewComponent soldier={soldier} />
+                  <SoldierViewComponent soldier={soldier} />
                 </div>
-            ))}
+              ))}
           </Stack>
         </AccordionDetails>
         <AccordionActions>
@@ -67,14 +77,22 @@ function Platoon({ platoonNum }: { platoonNum: number }) {
             event.preventDefault();
             const formData = new FormData(event.currentTarget);
             const formJson = Object.fromEntries(formData.entries());
-            const checkboxes = event.currentTarget.querySelectorAll('input[type="checkbox"]');
-            const roles = parseRolesFromCheckboxes(checkboxes as NodeListOf<HTMLInputElement>);
+            const checkboxes = event.currentTarget.querySelectorAll(
+              'input[type="checkbox"]'
+            );
+            const roles = parseRolesFromCheckboxes(
+              checkboxes as NodeListOf<HTMLInputElement>
+            );
             try {
-              const newSoldier = new Soldier(platoonNum, formJson.name as string, roles);
+              const newSoldier = new Soldier(
+                platoonNum,
+                formJson.name as string,
+                roles
+              );
               companyContext.addSoldier(newSoldier);
               setOpenAddSoldier(false);
             } catch (error) {
-              alert(error)
+              alert(error);
             }
           },
         }}
@@ -93,11 +111,11 @@ function Platoon({ platoonNum }: { platoonNum: number }) {
             fullWidth
             variant="standard"
           />
-        <FormGroup>
+          <FormGroup>
             <FormControlLabel control={<Checkbox />} label="Combat" />
             <FormControlLabel control={<Checkbox />} label="Sharpshooter" />
             <FormControlLabel control={<Checkbox />} label="Commander" />
-        </FormGroup>
+          </FormGroup>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setOpenAddSoldier(false)}>Cancel</Button>
