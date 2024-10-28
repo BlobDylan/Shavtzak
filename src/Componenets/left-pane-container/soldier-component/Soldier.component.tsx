@@ -25,8 +25,8 @@ function SoldierViewComponent(props:{soldier: Soldier}) {
                 <Typography variant="body1">{props.soldier.name}</Typography>
                 <Typography variant="body2">{prettyPrintRoles(props.soldier.roles)}</Typography>
             </Stack>
-            <IconButton onClick={() => companyContext.deleteSoldier(props.soldier)}>
-                <DeleteIcon />
+            <IconButton>
+                <DeleteIcon onClick={() => companyContext.deleteSoldier(props.soldier)} />
             </IconButton>
         </Box>
     );

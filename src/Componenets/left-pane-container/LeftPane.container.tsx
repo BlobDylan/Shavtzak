@@ -18,8 +18,8 @@ function LeftPaneContainer() {
       sx={{ padding: "1rem" }}
       width = "100%"
     >
-      <Stack spacing={1} sx={{ width: "100%" }}>
-        <Typography variant="h3">Pluga B</Typography>
+      <Stack spacing={1} display={"flex"} alignItems={"center"} sx={{ width: "100%" }}>
+        <Typography variant="h4">Pluga B</Typography>
         <Platoon platoonNum={1} />
         <Platoon platoonNum={2} />
         <Platoon platoonNum={3} />
