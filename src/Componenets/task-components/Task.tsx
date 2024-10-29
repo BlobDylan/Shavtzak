@@ -53,7 +53,7 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
 
                   companyContext.assignSoldierToTaskInstance(
                     item as Soldier,
-                    role,
+                    index,
                     taskInstance
                   );
                   if (didDrop) {
@@ -77,6 +77,7 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
 
             return (
               <Stack
+                key={index}
                 width={"100px"}
                 height={"50px"}
                 border={"3px dashed"}
@@ -85,7 +86,7 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                 display={"flex"}
                 flexDirection={"column"}
                 alignItems={"center"}
-                justifyContent={"space-between"}
+                justifyContent={"center"}
                 ref={drop}
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}

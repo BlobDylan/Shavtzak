@@ -47,7 +47,7 @@ function Platoon({ platoonNum }: { platoonNum: number }) {
             justifyContent: "space-between",
           }}
         >
-          <Checkbox color="primary.main" />
+          <Checkbox />
           <div style={{ alignSelf: "center" }}>{`Platoon ${platoonNum}`}</div>
         </AccordionSummary>
         <AccordionDetails sx={{ padding: "6px 60px 6px 20px" }}>

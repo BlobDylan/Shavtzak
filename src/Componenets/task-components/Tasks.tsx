@@ -8,7 +8,6 @@ import { useState } from "react";
 
 function Tasks() {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const [currentDateString, setCurrentDateString] = useState("Today");
 
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
@@ -17,27 +16,6 @@ function Tasks() {
     const today = new Date();
     today.setDate(today.getDate() + value - 2);
     setCurrentDate(today);
-    if (value === 1) {
-      setCurrentDateString("Yesterday");
-    } else if (value === 2) {
-      setCurrentDateString("Today");
-    } else if (value === 3) {
-      setCurrentDateString("Tomorrow");
-    } else {
-      const dayname = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-      ];
-      const day = today.getDay();
-      const month = today.getMonth();
-      const year = today.getFullYear();
-      setCurrentDateString(dayname[day] + ", " + month + "/" + year);
-    }
   };
 
   const companyContext = useCompanyContext() as CompanyContextType;
@@ -50,9 +28,14 @@ function Tasks() {
       alignItems={"center"}
     >
       <Typography variant="h4">Tasks</Typography>
-      <Typography variant="h6">{currentDateString}</Typography>
+      <Typography variant="h6">{currentDate.toDateString()}</Typography>
       {companyContext.company.taskInstances
         .filter((task_instance) => {
+          console.log(
+            "task_instance.id for ",
+            task_instance.startTime,
+            task_instance.id
+          );
           return task_instance.startTime.getDate() === currentDate.getDate();
         })
         .map((taskInstance, index) => (

@@ -32,7 +32,7 @@ function SoldierViewComponent(props: { soldier: Soldier }) {
         padding: "0.5rem",
       }}
     >
-      <Checkbox color="primary.main" />
+      <Checkbox />
       <Stack
         display={"flex"}
         flexDirection={"column"}
@@ -44,10 +44,8 @@ function SoldierViewComponent(props: { soldier: Soldier }) {
           {prettyPrintRoles(props.soldier.roles)}
         </Typography>
       </Stack>
-      <IconButton>
-        <DeleteIcon
-          onClick={() => companyContext.deleteSoldier(props.soldier)}
-        />
+      <IconButton onClick={() => companyContext.deleteSoldier(props.soldier)}>
+        <DeleteIcon />
       </IconButton>
     </Box>
   );

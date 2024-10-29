@@ -1,8 +1,10 @@
 import { Soldier } from "./Soldier.model";
 import { SoldierRole } from "./SoldierRole.enum";
 import { TaskType } from "./TaskType.enum";
+import { v4 as uuidv4 } from "uuid";
 
 export class TaskInstance {
+  id: string;
   task: Task;
   startTime: Date;
   duration: number;
@@ -14,6 +16,7 @@ export class TaskInstance {
     duration: number,
     assignedSoldiers: Soldier[]
   ) {
+    this.id = uuidv4();
     this.task = task;
     if (typeof startTime === "string") {
       this.startTime = new Date(startTime);
@@ -37,15 +40,26 @@ export class TaskInstance {
     }
   }
 
-  // TODO: maybe add better soldier roles validation
-  assignNewSoldier(soldier: Soldier, role: SoldierRole): void {
+  assignNewSoldier(soldier: Soldier, roleIndex: number): void {
+    const role = this.task.roles[roleIndex];
+    if (role === undefined) {
+      throw new Error("Role not found");
+    }
     if (this.assignedSoldiers.includes(soldier)) {
       throw new Error("Soldier already assigned to task");
     }
     if (!this.task.roles.includes(role) || !soldier.roles.includes(role)) {
       throw new Error("Role not allowed for task");
     }
-    this.assignedSoldiers.push(soldier);
+    this.assignedSoldiers[roleIndex] = soldier;
+  }
+
+  removeSoldier(soldier: Soldier): void {
+    const index = this.assignedSoldiers.indexOf(soldier);
+    if (index === -1) {
+      throw new Error("Soldier not assigned to task");
+    }
+    this.assignedSoldiers.splice(index, 1);
   }
 }
 
