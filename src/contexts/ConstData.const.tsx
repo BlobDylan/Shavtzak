@@ -11,7 +11,6 @@ export const predefinedTasks: Task[] = [
   ]),
 ];
 
-// insure tasks exist for yesterday untill next week today. only if they dont already exist
 export const generateMissingTaskInstances = (
   existingTaskInstances: TaskInstance[],
   dates: Date[]
@@ -23,7 +22,7 @@ export const generateMissingTaskInstances = (
     );
     if (taskInstancesForDate.length === 0) {
       for (let task of predefinedTasks) {
-        taskInstances.push(new TaskInstance(task, date, 2, []));
+        taskInstances.push(new TaskInstance(null, task, date, 2, []));
       }
     }
   }

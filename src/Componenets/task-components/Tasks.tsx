@@ -4,7 +4,7 @@ import {
   CompanyContextType,
   useCompanyContext,
 } from "../../contexts/Company.ctx";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Tasks() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -20,6 +20,18 @@ function Tasks() {
 
   const companyContext = useCompanyContext() as CompanyContextType;
 
+  const [taskInstances, setTaskInstances] = useState(
+    companyContext.company.taskInstances
+  );
+
+  useEffect(() => {
+    setTaskInstances(
+      companyContext.company.taskInstances.filter((task_instance) => {
+        return task_instance.startTime.getDate() === currentDate.getDate();
+      })
+    );
+  }, [currentDate, companyContext.company.taskInstances]);
+
   return (
     <Box
       width={"100%"}
@@ -29,18 +41,9 @@ function Tasks() {
     >
       <Typography variant="h4">Tasks</Typography>
       <Typography variant="h6">{currentDate.toDateString()}</Typography>
-      {companyContext.company.taskInstances
-        .filter((task_instance) => {
-          console.log(
-            "task_instance.id for ",
-            task_instance.startTime,
-            task_instance.id
-          );
-          return task_instance.startTime.getDate() === currentDate.getDate();
-        })
-        .map((taskInstance, index) => (
-          <Task key={index} taskInstance={taskInstance} />
-        ))}
+      {taskInstances.map((taskInstance, index) => (
+        <Task key={index} taskInstance={taskInstance} />
+      ))}
       <Stack spacing={2} display={"flex"} alignItems={"center"}>
         <Pagination
           count={8}

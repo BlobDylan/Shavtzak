@@ -11,12 +11,13 @@ export class TaskInstance {
   assignedSoldiers: Soldier[];
 
   constructor(
+    id: string | null,
     task: Task,
     startTime: string | Date,
     duration: number,
     assignedSoldiers: Soldier[]
   ) {
-    this.id = uuidv4();
+    this.id = id ?? uuidv4();
     this.task = task;
     if (typeof startTime === "string") {
       this.startTime = new Date(startTime);

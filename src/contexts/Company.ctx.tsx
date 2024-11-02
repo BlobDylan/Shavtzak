@@ -60,6 +60,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         taskInstance.task.roles
       );
       const parsedTaskInstance = new TaskInstance(
+        taskInstance.id,
         taskInstanceTask,
         taskInstance.startTime,
         taskInstance.duration,
