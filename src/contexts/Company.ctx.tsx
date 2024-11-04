@@ -3,6 +3,8 @@ import { Company } from "../Componenets/shared/Company.model";
 import { Soldier } from "../Componenets/shared/Soldier.model";
 import { LOCAL_STORAGE_COMPANY_DATA_KEY } from "../apis/Consts";
 import { Task, TaskInstance } from "../Componenets/shared/Task.model";
+import { MissionDay } from "../Componenets/shared/MissionDay.model";
+import { generateMissingMissionDays } from "./helpers";
 
 export type CompanyContextType = {
   company: Company;
@@ -43,24 +45,20 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     const storedCompanyData = JSON.parse(
       localStorage.getItem(LOCAL_STORAGE_COMPANY_DATA_KEY) || "{}"
     );
+
     const parsedSoldiers: Soldier[] = [];
     for (let soldier of storedCompanyData.soldiers ?? []) {
       soldier = new Soldier(soldier.platoon, soldier.name, soldier.roles);
       parsedSoldiers.push(soldier);
     }
-    const parsedTasks: Task[] = [];
-    for (let task of storedCompanyData.tasks ?? []) {
-      task = new Task(task.name, task.roles);
-      parsedTasks.push(task);
-    }
+
     const parsedTaskInstances: TaskInstance[] = [];
     for (let taskInstance of storedCompanyData.taskInstances ?? []) {
       const taskInstanceTask = new Task(
-        taskInstance.task.name,
+        taskInstance.task.type,
         taskInstance.task.roles
       );
       const parsedTaskInstance = new TaskInstance(
-        taskInstance.id,
         taskInstanceTask,
         taskInstance.startTime,
         taskInstance.duration,
@@ -68,17 +66,25 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       parsedTaskInstances.push(parsedTaskInstance);
     }
-    setCompany(new Company(parsedSoldiers, parsedTasks, parsedTaskInstances));
+
+    const missionDays: MissionDay[] = [];
+    for (let missionDay of storedCompanyData.missionDays ?? []) {
+      const parsedMissionDay = new MissionDay(missionDay.startOfDay, missionDay.includedSoldiers, missionDay.excludedSoldiers);
+      missionDays.push(parsedMissionDay);
+    }
+    const fullMissionDays = generateMissingMissionDays(missionDays);
+
+    setCompany(new Company(parsedSoldiers, parsedTaskInstances, fullMissionDays));
   };
 
   const addSoldier = (soldier: Soldier): void => {
     const newSoldiers = [...company.soldiers, soldier];
-    setCompany(new Company(newSoldiers, company.tasks, company.taskInstances));
+    setCompany(new Company(newSoldiers, company.taskInstances, company.missionDays));
   };
 
   const deleteSoldier = (soldier: Soldier): void => {
     const newSoldiers = company.soldiers.filter((s) => s.name !== soldier.name);
-    setCompany(new Company(newSoldiers, company.tasks, company.taskInstances));
+    setCompany(new Company(newSoldiers, company.taskInstances, company.missionDays));
   };
 
   const assignSoldierToTaskInstance = (
@@ -101,8 +107,8 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         );
         const updatedCompany = new Company(
           prevCompany.soldiers,
-          prevCompany.tasks,
-          updatedTaskInstances
+          updatedTaskInstances,
+          company.missionDays
         );
         return updatedCompany;
       });

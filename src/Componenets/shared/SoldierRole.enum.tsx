@@ -3,4 +3,5 @@ export enum SoldierRole {
   SHARPSHOOTER = "Sharpshooter",
   COMMANDER = "Commander",
   DRIVER = "Driver",
+  MEDIC = "Medic"
 }
