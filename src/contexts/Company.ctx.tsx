@@ -3,9 +3,13 @@ import { Company } from "../Componenets/shared/Company.model";
 import { Soldier } from "../Componenets/shared/Soldier.model";
 import { LOCAL_STORAGE_COMPANY_DATA_KEY } from "../apis/Consts";
 import { Task, TaskInstance } from "../Componenets/shared/Task.model";
+import { SoldierRole } from "../Componenets/shared/SoldierRole.enum";
 import { MissionDay } from "../Componenets/shared/MissionDay.model";
 import { generateMissingMissionDays } from "./helpers";
-import { predefinedTaskInstances } from "../ConstData.const";
+import {
+  predefinedTaskInstances,
+  predefinedSoldiers,
+} from "../ConstData.const";
 import { useSnackbar } from "notistack";
 
 export type CompanyContextType = {
@@ -23,6 +27,7 @@ export type CompanyContextType = {
     taskInstance: TaskInstance
   ) => void;
   generateDefaultTasks: (missionDay: MissionDay) => void;
+  generateAssignments: (missionDay: MissionDay) => void;
 };
 
 const CompanyContext = createContext<CompanyContextType | null>(null);
@@ -50,7 +55,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     );
 
     const parsedSoldiers: Soldier[] = [];
-    for (let soldier of storedCompanyData.soldiers ?? []) {
+    for (let soldier of storedCompanyData.soldiers ?? predefinedSoldiers) {
       soldier = new Soldier(soldier.platoon, soldier.name, soldier.roles);
       parsedSoldiers.push(soldier);
     }
@@ -119,6 +124,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       company.taskInstances.push(newTaskInstance);
     }
   };
+
   const { enqueueSnackbar } = useSnackbar();
 
   const assignSoldierToTaskInstance = (
@@ -164,6 +170,72 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const generateAssignments = (missionDay: MissionDay): void => {
+    try {
+      const orderedSoldiers = company.soldiers.sort((soldier) =>
+        calculatePriority(
+          soldier,
+          missionDay,
+          company.missionDays[company.missionDays.indexOf(missionDay) - 1]
+        )
+      );
+      let i = 0;
+      for (const taskInstance of company.getRelevantTaskInstances(missionDay)) {
+        for (const roleIndex in taskInstance.task.roles) {
+          if (
+            taskInstance.task.roles[roleIndex] === SoldierRole.MEDIC ||
+            taskInstance.task.roles[roleIndex] === SoldierRole.DRIVER
+          ) {
+            continue;
+          }
+          i++;
+          const role = taskInstance.task.roles[roleIndex];
+          const availableSoldiers = company.soldiers.filter((soldier) =>
+            soldier.roles.includes(role)
+          );
+          const assignedSoldier = orderedSoldiers[i % availableSoldiers.length];
+          if (assignedSoldier) {
+            assignSoldierToTaskInstance(
+              assignedSoldier,
+              Number(roleIndex),
+              taskInstance
+            );
+          }
+        }
+      }
+    } catch (error) {
+      enqueueSnackbar(String(error), { variant: "error" });
+    }
+  };
+
+  const calculatePriority = (
+    soldier: Soldier,
+    missionDay: MissionDay,
+    previosDay: MissionDay
+  ): number => {
+    let relevantTaskInstances = company.getRelevantTaskInstances(missionDay);
+    if (previosDay) {
+      relevantTaskInstances = relevantTaskInstances.concat(
+        company.getRelevantTaskInstances(previosDay)
+      );
+    }
+    let timeSinceLastAssignment = Number.MAX_VALUE;
+    for (const taskInstance of relevantTaskInstances) {
+      for (const assignedSoldier of taskInstance.assignedSoldiers) {
+        if (assignedSoldier === null) {
+          continue;
+        }
+        if (assignedSoldier.name === soldier.name) {
+          timeSinceLastAssignment = Math.min(
+            timeSinceLastAssignment,
+            new Date().getTime() - taskInstance.startTime.getTime()
+          );
+        }
+      }
+    }
+    return timeSinceLastAssignment;
+  };
+
   const saveCompanyData = (company: Company) => {
     localStorage.setItem(
       LOCAL_STORAGE_COMPANY_DATA_KEY,
@@ -181,6 +253,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         assignSoldierToTaskInstance,
         removeSoldierFromTaskInstance,
         generateDefaultTasks,
+        generateAssignments,
       }}
     >
       {children}

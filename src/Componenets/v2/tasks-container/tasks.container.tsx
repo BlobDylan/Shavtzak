@@ -46,6 +46,10 @@ function TasksContainer() {
     }
   };
 
+  const onClickedGenerateAssignment = () => {
+    companyContext.generateAssignments(currentMissionDay as MissionDay);
+  };
+
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
     value: number
@@ -81,6 +85,14 @@ function TasksContainer() {
               </Button>
             </div>
           </div>
+        )}
+        {!(currentMissionDayTaskInstances.length == 0) && (
+          <Button
+            onClick={onClickedGenerateAssignment}
+            sx={{ backgroundColor: "primary.main" }}
+          >
+            Generate Assignment
+          </Button>
         )}
         {currentMissionDayTaskInstances.map((taskInstance, index) => (
           <Task key={index} taskInstance={taskInstance} />
