@@ -19,7 +19,7 @@ export class Company {
 
   public getRelevantTaskInstances(missionDay: MissionDay): TaskInstance[] {
     return this.taskInstances.filter((taskInstance) => {
-      taskInstance.startTime.getFullYear() == missionDay.startOfDay.getFullYear() 
+      return taskInstance.startTime.getFullYear() == missionDay.startOfDay.getFullYear() 
       &&
       taskInstance.startTime.getMonth() == missionDay.startOfDay.getMonth()
       &&

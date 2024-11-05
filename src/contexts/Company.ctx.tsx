@@ -5,6 +5,7 @@ import { LOCAL_STORAGE_COMPANY_DATA_KEY } from "../apis/Consts";
 import { Task, TaskInstance } from "../Componenets/shared/Task.model";
 import { MissionDay } from "../Componenets/shared/MissionDay.model";
 import { generateMissingMissionDays } from "./helpers";
+import { predefinedTaskInstances } from "../ConstData.const";
 
 export type CompanyContextType = {
   company: Company;
@@ -19,6 +20,9 @@ export type CompanyContextType = {
   removeSoldierFromTaskInstance: (
     soldier: Soldier,
     taskInstance: TaskInstance
+  ) => void;
+  generateDefaultTasks: (
+    missionDay: MissionDay
   ) => void;
 };
 
@@ -87,6 +91,26 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     setCompany(new Company(newSoldiers, company.taskInstances, company.missionDays));
   };
 
+  const generateDefaultTasks = (missionDay: MissionDay): void => {
+    if (company.getRelevantTaskInstances(missionDay).length > 0) {
+      // Skip generation because mission day already was generated with some task instances
+      return
+    }
+
+    for (const predefinedTaskInstance of predefinedTaskInstances) {
+      const startTime = new Date(missionDay.startOfDay);
+      startTime.setHours(predefinedTaskInstance.beginningHour);
+
+      const newTaskInstance = new TaskInstance(
+        predefinedTaskInstance.task,
+        startTime,
+        predefinedTaskInstance.duration,
+        []
+      )
+      company.taskInstances.push(newTaskInstance)
+    }
+  }
+
   const assignSoldierToTaskInstance = (
     soldier: Soldier,
     roleIndex: number,
@@ -144,6 +168,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         fetchCompanyData,
         assignSoldierToTaskInstance,
         removeSoldierFromTaskInstance,
+        generateDefaultTasks
       }}
     >
       {children}
