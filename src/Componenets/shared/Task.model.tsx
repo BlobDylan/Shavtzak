@@ -13,7 +13,7 @@ export class TaskInstance {
     task: Task,
     startTime: string | Date,
     duration: number,
-    assignedSoldiers: Soldier[],
+    assignedSoldiers: Soldier[]
   ) {
     this.id = `${task.type}-${startTime}`;
     this.task = task;
