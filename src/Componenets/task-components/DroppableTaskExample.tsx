@@ -35,7 +35,7 @@ export interface DustbinState {
 export const DroppableTaskExampleComponent: FC<DustbinProps> = ({
   children,
 }) => {
-  const [hasDropped, setHasDropped] = useState(false);
+  const [hasDropped, setHasDropped] = useState(false)
   const [hasDroppedOnChild, setHasDroppedOnChild] = useState(false);
 
   const [{ isOverCurrent }, drop] = useDrop(

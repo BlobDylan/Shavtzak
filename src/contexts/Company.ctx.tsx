@@ -6,6 +6,7 @@ import { Task, TaskInstance } from "../Componenets/shared/Task.model";
 import { MissionDay } from "../Componenets/shared/MissionDay.model";
 import { generateMissingMissionDays } from "./helpers";
 import { predefinedTaskInstances } from "../ConstData.const";
+import { useSnackbar } from "notistack";
 
 export type CompanyContextType = {
   company: Company;
@@ -21,9 +22,7 @@ export type CompanyContextType = {
     soldier: Soldier,
     taskInstance: TaskInstance
   ) => void;
-  generateDefaultTasks: (
-    missionDay: MissionDay
-  ) => void;
+  generateDefaultTasks: (missionDay: MissionDay) => void;
 };
 
 const CompanyContext = createContext<CompanyContextType | null>(null);
@@ -73,28 +72,38 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const missionDays: MissionDay[] = [];
     for (let missionDay of storedCompanyData.missionDays ?? []) {
-      const parsedMissionDay = new MissionDay(missionDay.startOfDay, missionDay.includedSoldiers, missionDay.excludedSoldiers);
+      const parsedMissionDay = new MissionDay(
+        missionDay.startOfDay,
+        missionDay.includedSoldiers,
+        missionDay.excludedSoldiers
+      );
       missionDays.push(parsedMissionDay);
     }
     const fullMissionDays = generateMissingMissionDays(missionDays);
 
-    setCompany(new Company(parsedSoldiers, parsedTaskInstances, fullMissionDays));
+    setCompany(
+      new Company(parsedSoldiers, parsedTaskInstances, fullMissionDays)
+    );
   };
 
   const addSoldier = (soldier: Soldier): void => {
     const newSoldiers = [...company.soldiers, soldier];
-    setCompany(new Company(newSoldiers, company.taskInstances, company.missionDays));
+    setCompany(
+      new Company(newSoldiers, company.taskInstances, company.missionDays)
+    );
   };
 
   const deleteSoldier = (soldier: Soldier): void => {
     const newSoldiers = company.soldiers.filter((s) => s.name !== soldier.name);
-    setCompany(new Company(newSoldiers, company.taskInstances, company.missionDays));
+    setCompany(
+      new Company(newSoldiers, company.taskInstances, company.missionDays)
+    );
   };
 
   const generateDefaultTasks = (missionDay: MissionDay): void => {
     if (company.getRelevantTaskInstances(missionDay).length > 0) {
       // Skip generation because mission day already was generated with some task instances
-      return
+      return;
     }
 
     for (const predefinedTaskInstance of predefinedTaskInstances) {
@@ -106,10 +115,11 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         startTime,
         predefinedTaskInstance.duration,
         []
-      )
-      company.taskInstances.push(newTaskInstance)
+      );
+      company.taskInstances.push(newTaskInstance);
     }
-  }
+  };
+  const { enqueueSnackbar } = useSnackbar();
 
   const assignSoldierToTaskInstance = (
     soldier: Soldier,
@@ -118,12 +128,14 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   ): void => {
     try {
       setCompany((prevCompany) => {
-        taskInstance.assignNewSoldier(soldier, roleIndex);
+        try {
+          taskInstance.assignNewSoldier(soldier, roleIndex);
+        } catch (error) {
+          enqueueSnackbar(String(error), { variant: "error" });
+        }
         const updatedTaskInstances = prevCompany.taskInstances.map(
           (instance) => {
-            console.log(`Comparing ${instance.id} with ${taskInstance.id}`);
             if (instance.id === taskInstance.id) {
-              console.log("match");
               return taskInstance;
             }
             return instance;
@@ -137,7 +149,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         return updatedCompany;
       });
     } catch (error) {
-      alert(error);
+      enqueueSnackbar(String(error), { variant: "error" });
     }
   };
 
@@ -148,7 +160,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     try {
       taskInstance.removeSoldier(soldier);
     } catch (error) {
-      alert(error);
+      enqueueSnackbar(String(error), { variant: "error" });
     }
   };
 
@@ -168,7 +180,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         fetchCompanyData,
         assignSoldierToTaskInstance,
         removeSoldierFromTaskInstance,
-        generateDefaultTasks
+        generateDefaultTasks,
       }}
     >
       {children}
