@@ -1,7 +1,6 @@
 import { Soldier } from "./Soldier.model";
 import { SoldierRole } from "./SoldierRole.enum";
 import { TaskType } from "./TaskType.enum";
-import { v4 as uuidv4 } from "uuid";
 
 export class TaskInstance {
   id: string;
@@ -11,13 +10,12 @@ export class TaskInstance {
   assignedSoldiers: Soldier[];
 
   constructor(
-    id: string | null,
     task: Task,
     startTime: string | Date,
     duration: number,
-    assignedSoldiers: Soldier[]
+    assignedSoldiers: Soldier[],
   ) {
-    this.id = id ?? uuidv4();
+    this.id = `${task.type}-${startTime}`;
     this.task = task;
     if (typeof startTime === "string") {
       this.startTime = new Date(startTime);

@@ -1,35 +1,29 @@
-import { generateMissingTaskInstances } from "../../contexts/ConstData.const";
+import { MissionDay } from "./MissionDay.model";
 import { Soldier } from "./Soldier.model";
-import { Task, TaskInstance } from "./Task.model";
+import { TaskInstance } from "./Task.model";
 
 export class Company {
   soldiers: Soldier[];
-  tasks: Task[];
-  dates: Date[] = [];
   taskInstances: TaskInstance[];
+  missionDays: MissionDay[];
 
   constructor(
     soldiers: Soldier[],
-    tasks: Task[],
-    taskInstances: TaskInstance[]
+    taskInstances: TaskInstance[],
+    missionDays: MissionDay[]
   ) {
     this.soldiers = soldiers;
-    this.tasks = tasks;
-    this.dates = this.generateDates();
-    this.taskInstances = generateMissingTaskInstances(
-      taskInstances,
-      this.dates
-    );
-    // this.taskInstances = taskInstances;
+    this.taskInstances = taskInstances;
+    this.missionDays = missionDays;
   }
-  generateDates(): Date[] {
-    let today = new Date();
-    let dates = [];
-    for (let i = -1; i < 7; i++) {
-      const date = new Date();
-      date.setDate(today.getDate() + i);
-      dates.push(date);
-    }
-    return dates;
+
+  public getRelevantTaskInstances(missionDay: MissionDay): TaskInstance[] {
+    return this.taskInstances.filter((taskInstance) => {
+      return taskInstance.startTime.getFullYear() == missionDay.startOfDay.getFullYear() 
+      &&
+      taskInstance.startTime.getMonth() == missionDay.startOfDay.getMonth()
+      &&
+      taskInstance.startTime.getDay() == missionDay.startOfDay.getDay()
+    });
   }
 }
