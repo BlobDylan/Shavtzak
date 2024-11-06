@@ -26,4 +26,10 @@ export class Company {
       taskInstance.startTime.getDay() == missionDay.startOfDay.getDay()
     });
   }
+
+  public getSoldiersByPlatoon(platoonNum: number): Soldier[] {
+    return this.soldiers.filter((soldier) => {
+      return soldier.platoon === platoonNum;
+    });
+  }
 }

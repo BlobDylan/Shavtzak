@@ -79,8 +79,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     for (let missionDay of storedCompanyData.missionDays ?? []) {
       const parsedMissionDay = new MissionDay(
         missionDay.startOfDay,
-        missionDay.includedSoldiers,
-        missionDay.excludedSoldiers
+        missionDay.excludedSoldiers,
       );
       missionDays.push(parsedMissionDay);
     }
