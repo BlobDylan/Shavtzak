@@ -170,70 +170,59 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
+  const firstSuitableSoldier = (
+    taskInstance: TaskInstance,
+    roleIndex: number,
+    soldiers: Soldier[]
+  ) => {
+    for (const soldier of soldiers) {
+      if (soldier.roles.includes(taskInstance.task.roles[roleIndex])) {
+        return soldier;
+      }
+    }
+    return null;
+  };
+
+  const generateAssignmentForTaskInstance = (taskInstance: TaskInstance) => {
+    for (let i = 0; i < taskInstance.task.roles.length; i++) {
+      const sortedSoldiers = company.soldiers.sort((soldier) => {
+        return timeSinceLastMission(soldier, taskInstance.startTime);
+      });
+      const assignedSoldier = firstSuitableSoldier(
+        taskInstance,
+        i,
+        sortedSoldiers
+      );
+      if (assignedSoldier) {
+        assignSoldierToTaskInstance(assignedSoldier, i, taskInstance);
+      }
+    }
+  };
+
   const generateAssignments = (missionDay: MissionDay): void => {
     try {
-      const orderedSoldiers = company.soldiers.sort((soldier) =>
-        calculatePriority(
-          soldier,
-          missionDay,
-          company.missionDays[company.missionDays.indexOf(missionDay) - 1]
-        )
-      );
-      let i = 0;
       for (const taskInstance of company.getRelevantTaskInstances(missionDay)) {
-        for (const roleIndex in taskInstance.task.roles) {
-          if (
-            taskInstance.task.roles[roleIndex] === SoldierRole.MEDIC ||
-            taskInstance.task.roles[roleIndex] === SoldierRole.DRIVER
-          ) {
-            continue;
-          }
-          i++;
-          const role = taskInstance.task.roles[roleIndex];
-          const availableSoldiers = company.soldiers.filter((soldier) =>
-            soldier.roles.includes(role)
-          );
-          const assignedSoldier = orderedSoldiers[i % availableSoldiers.length];
-          if (assignedSoldier) {
-            assignSoldierToTaskInstance(
-              assignedSoldier,
-              Number(roleIndex),
-              taskInstance
-            );
-          }
-        }
+        generateAssignmentForTaskInstance(taskInstance);
       }
     } catch (error) {
       enqueueSnackbar(String(error), { variant: "error" });
     }
   };
 
-  const calculatePriority = (
+  const timeSinceLastMission = (
     soldier: Soldier,
-    missionDay: MissionDay,
-    previosDay: MissionDay
+    taskInstanceStartTime: Date
   ): number => {
-    let relevantTaskInstances = company.getRelevantTaskInstances(missionDay);
-    if (previosDay) {
-      relevantTaskInstances = relevantTaskInstances.concat(
-        company.getRelevantTaskInstances(previosDay)
-      );
+    const lastMission = company.taskInstances
+      .filter((taskInstance) => taskInstance.assignedSoldiers.includes(soldier))
+      .sort((a, b) => b.startTime.getTime() - a.startTime.getTime())[0];
+    debugger;
+
+    if (!lastMission) {
+      return Number.MAX_VALUE;
     }
-    let timeSinceLastAssignment = Number.MAX_VALUE;
-    for (const taskInstance of relevantTaskInstances) {
-      for (const assignedSoldier of taskInstance.assignedSoldiers) {
-        if (assignedSoldier === null) {
-          continue;
-        }
-        if (assignedSoldier.name === soldier.name) {
-          timeSinceLastAssignment = Math.min(
-            timeSinceLastAssignment,
-            new Date().getTime() - taskInstance.startTime.getTime()
-          );
-        }
-      }
-    }
-    return timeSinceLastAssignment;
+
+    return taskInstanceStartTime.getTime() - lastMission.startTime.getTime();
   };
 
   const saveCompanyData = (company: Company) => {
