@@ -1,4 +1,6 @@
+import { Company } from "../Componenets/shared/Company.model";
 import { MissionDay } from "../Componenets/shared/MissionDay.model";
+import { LOCAL_STORAGE_COMPANY_DATA_KEY } from "../apis/Consts";
 
 export const generateMissingMissionDays = (
     existingMissionDays: MissionDay[]
@@ -15,4 +17,18 @@ export const generateMissingMissionDays = (
     }
 
     return missionDays;
+};
+
+export const resetCompanyData = () => {
+    localStorage.setItem(
+      LOCAL_STORAGE_COMPANY_DATA_KEY,
+      JSON.stringify({})
+    );
+};
+
+export const saveCompanyData = (company: Company) => {
+    localStorage.setItem(
+        LOCAL_STORAGE_COMPANY_DATA_KEY,
+        JSON.stringify(company)
+    );
 };

@@ -9,18 +9,12 @@ import {
   CompanyContextType,
   useCompanyContext,
 } from "../../../contexts/Company.ctx";
-import { ItemTypes } from "../../task-components/DroppableTaskExample";
 
 function SoldierViewComponent(props: { soldier: Soldier }) {
-  const [, drag] = useDrag(() => ({
-    type: ItemTypes.SOLDIER,
-    item: props.soldier,
-  }));
   const companyContext = useCompanyContext() as CompanyContextType;
 
   return (
     <Box
-      ref={drag}
       width={"100%"}
       display="flex"
       flexDirection="row"

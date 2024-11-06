@@ -5,7 +5,7 @@ import {
   useCompanyContext,
   CompanyContextType,
 } from "../../contexts/Company.ctx";
-import { useState } from "react";
+import { useState, Fragment } from "react";
 import { Soldier } from "../shared/Soldier.model";
 
 export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
@@ -54,7 +54,7 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
             };
 
             return (
-              <>
+              <Stack key={index + role}>
                 <Button
                   id="demo-positioned-button"
                   aria-controls={open ? "demo-positioned-menu" : undefined}
@@ -98,7 +98,7 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                     </MenuItem>
                   ))}
                 </Menu>
-              </>
+              </Stack>
             );
           })}
         </Stack>

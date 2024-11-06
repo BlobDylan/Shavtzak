@@ -16,8 +16,8 @@ function TasksContainer() {
   const companyContext = useCompanyContext() as CompanyContextType;
   const [currentMissionDayTaskInstances, setCurrentMissionDayTaskInstances] =
     useState<TaskInstance[]>([]);
-  const [shouldShowExceptions, setShouldShowExceptions] = useState<boolean>(false);
-
+  const [shouldShowExceptions, setShouldShowExceptions] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const today = new Date();
@@ -49,6 +49,10 @@ function TasksContainer() {
     }
   };
 
+  const onClickedGenerateAssignment = () => {
+    companyContext.generateAssignments(currentMissionDay as MissionDay);
+  };
+
   const handlePageChange = (
     _event: React.ChangeEvent<unknown>,
     value: number
@@ -58,46 +62,66 @@ function TasksContainer() {
   };
 
   if (currentMissionDay === null) return <div>error</div>;
-  else if (currentMissionDay) return (
-    <div>
-      <Box
-        width={"100%"}
-        display={"flex"}
-        flexDirection={"column"}
-        alignItems={"center"}
-      >
-        <Typography variant="h4">Tasks</Typography>
-        <Typography variant="h6">
-          {currentMissionDay.startOfDay.toDateString()}
-        </Typography>
-        <div className="shared-tasks">
-          <div className="select-exceptions-button">
-            <Button sx={{ backgroundColor: "primary.main" }} onClick={() => {setShouldShowExceptions(!shouldShowExceptions)}}>Toggle exceptions select</Button>
+  else if (currentMissionDay)
+    return (
+      <div>
+        <Box
+          width={"100%"}
+          display={"flex"}
+          flexDirection={"column"}
+          alignItems={"center"}
+        >
+          <Typography variant="h4">Tasks</Typography>
+          <Typography variant="h6">
+            {currentMissionDay.startOfDay.toDateString()}
+          </Typography>
+          <div className="shared-tasks">
+            <div className="select-exceptions-button">
+              <Button
+                sx={{ backgroundColor: "primary.main" }}
+                onClick={() => {
+                  setShouldShowExceptions(!shouldShowExceptions);
+                }}
+              >
+                Toggle exceptions select
+              </Button>
+            </div>
           </div>
-        </div>
-        { shouldShowExceptions && <ExceptionsComponent missionDay={currentMissionDay}></ExceptionsComponent> }
-        { !shouldShowExceptions &&
-              <div>
-                {currentMissionDayTaskInstances.length == 0 && (
-                  <div>
-                    <div className="no-tasks-title">
-                      No tasks exists on this mission day
-                    </div>
-                    <div className="generate-default-tasks-button">
-                      <Button
-                        onClick={onClickedGenerateDefaultTasks}
-                        sx={{ backgroundColor: "primary.main" }}
-                      >
-                        Generate default tasks
-                      </Button>
-                    </div>
+          {shouldShowExceptions && (
+            <ExceptionsComponent
+              missionDay={currentMissionDay}
+            ></ExceptionsComponent>
+          )}
+          {!shouldShowExceptions && (
+            <div>
+              {currentMissionDayTaskInstances.length == 0 && (
+                <div>
+                  <div className="no-tasks-title">
+                    No tasks exists on this mission day
                   </div>
-                )}
-                {currentMissionDayTaskInstances.map((taskInstance, index) => (
-                  <Task key={index} taskInstance={taskInstance} />
-                ))}
-              </div>
-          }
+                  <div className="generate-default-tasks-button">
+                    <Button
+                      onClick={onClickedGenerateDefaultTasks}
+                      sx={{ backgroundColor: "primary.main" }}
+                    >
+                      Generate default tasks
+                    </Button>
+                  </div>
+                </div>
+              )}
+              {!(currentMissionDayTaskInstances.length == 0) && (
+                <Button
+                  onClick={onClickedGenerateAssignment}
+                  sx={{ backgroundColor: "primary.main" }}
+                >
+                  Generate Assignment
+                </Button>
+              )}
+              {currentMissionDayTaskInstances.map((taskInstance, index) => (
+                <Task key={index} taskInstance={taskInstance} />
+              ))}
+            </div>
+          )}
           <Stack spacing={2} display={"flex"} alignItems={"center"}>
             <Pagination
               count={companyContext.company.missionDays.length}
@@ -108,9 +132,9 @@ function TasksContainer() {
               page={currentPage}
             />
           </Stack>
-          </Box>
-        </div>
-      );
+        </Box>
+      </div>
+    );
 }
 
 export default TasksContainer;
