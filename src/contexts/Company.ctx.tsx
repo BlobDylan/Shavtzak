@@ -79,7 +79,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     for (let missionDay of storedCompanyData.missionDays ?? []) {
       const parsedMissionDay = new MissionDay(
         missionDay.startOfDay,
-        missionDay.excludedSoldiers,
+        missionDay.excludedSoldiers
       );
       missionDays.push(parsedMissionDay);
     }
@@ -183,10 +183,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const generateAssignmentForTaskInstance = (taskInstance: TaskInstance) => {
+    let sortedSoldiers = company.soldiers.sort((soldier) => {
+      return timeSinceLastMission(soldier, taskInstance.startTime);
+    });
     for (let i = 0; i < taskInstance.task.roles.length; i++) {
-      const sortedSoldiers = company.soldiers.sort((soldier) => {
-        return timeSinceLastMission(soldier, taskInstance.startTime);
-      });
       const assignedSoldier = firstSuitableSoldier(
         taskInstance,
         i,
@@ -194,6 +194,9 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       if (assignedSoldier) {
         assignSoldierToTaskInstance(assignedSoldier, i, taskInstance);
+        sortedSoldiers = sortedSoldiers.filter(
+          (soldier) => soldier !== assignedSoldier
+        );
       }
     }
   };
