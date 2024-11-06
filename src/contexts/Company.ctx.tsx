@@ -37,18 +37,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const [company, setCompany] = useState<Company>(new Company([], [], []));
 
-  useEffect(() => {
-    const handleBeforeUnload = () => {
-      saveCompanyData(company);
-    };
-
-    window.addEventListener("beforeunload", handleBeforeUnload);
-
-    return () => {
-      window.removeEventListener("beforeunload", handleBeforeUnload);
-    };
-  }, [company]);
-
   const fetchCompanyData = (): void => {
     const storedCompanyData = JSON.parse(
       localStorage.getItem(LOCAL_STORAGE_COMPANY_DATA_KEY) || "{}"
@@ -222,13 +210,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     }
 
     return taskInstanceStartTime.getTime() - lastMission.startTime.getTime();
-  };
-
-  const saveCompanyData = (company: Company) => {
-    localStorage.setItem(
-      LOCAL_STORAGE_COMPANY_DATA_KEY,
-      JSON.stringify(company)
-    );
   };
 
   return (

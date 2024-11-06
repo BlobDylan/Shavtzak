@@ -1,10 +1,11 @@
-import { Box, Typography, Stack } from "@mui/material";
+import { Box, Typography, Stack, Button } from "@mui/material";
 import Platoon from "./platoon-component/Platoon";
 import {
   CompanyContextType,
   useCompanyContext,
 } from "../../contexts/Company.ctx";
 import { useEffect } from "react";
+import { resetCompanyData, saveCompanyData } from "../../contexts/helpers";
 
 function LeftPaneContainer() {
   const companyContext = useCompanyContext() as CompanyContextType;
@@ -21,6 +22,8 @@ function LeftPaneContainer() {
       sx={{ padding: "1rem" }}
       width="100%"
     >
+      <Button sx={{ backgroundColor: "primary.main" }} onClick={() => resetCompanyData()}>Reset Data</Button>
+      <Button sx={{ backgroundColor: "primary.main" }} onClick={() => saveCompanyData(companyContext.company)}>Save Data</Button>
       <Stack
         spacing={1}
         display={"flex"}
