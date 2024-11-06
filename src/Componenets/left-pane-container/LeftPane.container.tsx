@@ -21,7 +21,7 @@ function LeftPaneContainer() {
       alignItems={"center"}
       sx={{ padding: "1rem" }}
       width="100%"
-    >
+    >``
       <Button sx={{ backgroundColor: "primary.main" }} onClick={() => resetCompanyData()}>Reset Data</Button>
       <Button sx={{ backgroundColor: "primary.main" }} onClick={() => saveCompanyData(companyContext.company)}>Save Data</Button>
       <Stack
