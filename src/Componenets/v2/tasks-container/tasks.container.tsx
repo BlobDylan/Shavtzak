@@ -8,6 +8,7 @@ import { MissionDay } from "../../shared/MissionDay.model";
 import { TaskInstance } from "../../shared/Task.model";
 import { Task } from "../../task-components/Task";
 import "./tasks.container.scss";
+import ExceptionsComponent from "./exceptions-component/exceptions.component";
 
 function TasksContainer() {
   const [currentMissionDay, setMissionDay] = useState<MissionDay | null>();
@@ -15,6 +16,8 @@ function TasksContainer() {
   const companyContext = useCompanyContext() as CompanyContextType;
   const [currentMissionDayTaskInstances, setCurrentMissionDayTaskInstances] =
     useState<TaskInstance[]>([]);
+  const [shouldShowExceptions, setShouldShowExceptions] = useState<boolean>(false);
+
 
   useEffect(() => {
     const today = new Date();
@@ -55,8 +58,8 @@ function TasksContainer() {
   };
 
   if (currentMissionDay === null) return <div>error</div>;
-  else if (currentMissionDay)
-    return (
+  else if (currentMissionDay) return (
+    <div>
       <Box
         width={"100%"}
         display={"flex"}
@@ -67,36 +70,47 @@ function TasksContainer() {
         <Typography variant="h6">
           {currentMissionDay.startOfDay.toDateString()}
         </Typography>
-        {currentMissionDayTaskInstances.length == 0 && (
-          <div>
-            <div className="no-tasks-title">
-              No tasks exists on this mission day
-            </div>
-            <div className="generate-default-tasks-button">
-              <Button
-                onClick={onClickedGenerateDefaultTasks}
-                sx={{ backgroundColor: "primary.main" }}
-              >
-                Generate default tasks
-              </Button>
-            </div>
+        <div className="shared-tasks">
+          <div className="select-exceptions-button">
+            <Button sx={{ backgroundColor: "primary.main" }} onClick={() => {setShouldShowExceptions(!shouldShowExceptions)}}>Toggle exceptions select</Button>
           </div>
-        )}
-        {currentMissionDayTaskInstances.map((taskInstance, index) => (
-          <Task key={index} taskInstance={taskInstance} />
-        ))}
-        <Stack spacing={2} display={"flex"} alignItems={"center"}>
-          <Pagination
-            count={companyContext.company.missionDays.length}
-            variant="outlined"
-            shape="rounded"
-            sx={{ backgroundColor: "primary.main" }}
-            onChange={handlePageChange}
-            page={currentPage}
-          />
-        </Stack>
-      </Box>
-    );
+        </div>
+        { shouldShowExceptions && <ExceptionsComponent missionDay={currentMissionDay}></ExceptionsComponent> }
+        { !shouldShowExceptions &&
+              <div>
+                {currentMissionDayTaskInstances.length == 0 && (
+                  <div>
+                    <div className="no-tasks-title">
+                      No tasks exists on this mission day
+                    </div>
+                    <div className="generate-default-tasks-button">
+                      <Button
+                        onClick={onClickedGenerateDefaultTasks}
+                        sx={{ backgroundColor: "primary.main" }}
+                      >
+                        Generate default tasks
+                      </Button>
+                    </div>
+                  </div>
+                )}
+                {currentMissionDayTaskInstances.map((taskInstance, index) => (
+                  <Task key={index} taskInstance={taskInstance} />
+                ))}
+              </div>
+          }
+          <Stack spacing={2} display={"flex"} alignItems={"center"}>
+            <Pagination
+              count={companyContext.company.missionDays.length}
+              variant="outlined"
+              shape="rounded"
+              sx={{ backgroundColor: "primary.main" }}
+              onChange={handlePageChange}
+              page={currentPage}
+            />
+          </Stack>
+          </Box>
+        </div>
+      );
 }
 
 export default TasksContainer;
