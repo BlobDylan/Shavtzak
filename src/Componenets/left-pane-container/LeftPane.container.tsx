@@ -4,15 +4,10 @@ import {
   CompanyContextType,
   useCompanyContext,
 } from "../../contexts/Company.ctx";
-import { useEffect } from "react";
 import { resetCompanyData, saveCompanyData } from "../../contexts/helpers";
 
 function LeftPaneContainer() {
   const companyContext = useCompanyContext() as CompanyContextType;
-
-  useEffect(() => {
-    companyContext.fetchCompanyData();
-  }, []);
 
   return (
     <Box
@@ -21,9 +16,20 @@ function LeftPaneContainer() {
       alignItems={"center"}
       sx={{ padding: "1rem" }}
       width="100%"
-    >``
-      <Button sx={{ backgroundColor: "primary.main" }} onClick={() => resetCompanyData()}>Reset Data</Button>
-      <Button sx={{ backgroundColor: "primary.main" }} onClick={() => saveCompanyData(companyContext.company)}>Save Data</Button>
+    >
+      ``
+      <Button
+        sx={{ backgroundColor: "primary.main" }}
+        onClick={() => resetCompanyData()}
+      >
+        Reset Data
+      </Button>
+      <Button
+        sx={{ backgroundColor: "primary.main" }}
+        onClick={() => saveCompanyData(companyContext.company)}
+      >
+        Save Data
+      </Button>
       <Stack
         spacing={1}
         display={"flex"}

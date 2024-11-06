@@ -1,11 +1,5 @@
-// import {
-//   BrowserRouter as Router,
-//   Route,
-//   Routes,
-//   useLocation,
-// } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-import { Stack } from "@mui/material";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "./Styles/Theme";
 import { CompanyProvider } from "./contexts/Company.ctx";
@@ -14,6 +8,31 @@ import LeftPaneContainer from "./Componenets/left-pane-container/LeftPane.contai
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { SnackbarProvider } from "notistack";
+import Navbar from "./Componenets/navbar-components/Navbar";
+import { CompanyContextType, useCompanyContext } from "./contexts/Company.ctx";
+import { useEffect } from "react";
+
+const MainLayout = () => {
+  const companyContext = useCompanyContext() as CompanyContextType;
+
+  useEffect(() => {
+    if (companyContext) {
+      companyContext.fetchCompanyData();
+    }
+  }, []);
+
+  return (
+    <>
+      <Navbar />
+      <div style={{ flex: 1 }}>
+        <Routes>
+          <Route path="/Soldiers" element={<LeftPaneContainer />} />
+          <Route path="/" element={<TasksContainer />} />
+        </Routes>
+      </div>
+    </>
+  );
+};
 
 function App() {
   return (
@@ -21,23 +40,9 @@ function App() {
       <DndProvider backend={HTML5Backend}>
         <ThemeProvider theme={theme}>
           <CompanyProvider>
-            {/* <div style={{ flex: 1 }}>
-            <Routes>
-              <Route path="/Soldiers" element={<LeftPaneContainer />} />
-              <Route path="/" element={<TasksContainer />} />
-            </Routes>
-          </div> */}
-            <Stack
-              direction={"row"}
-              width={"100vw"}
-              display={"flex"}
-              flexDirection={"row"}
-              alignItems={"center"}
-              justifyContent={"space-around"}
-            >
-              <LeftPaneContainer />
-              <TasksContainer />
-            </Stack>
+            <BrowserRouter>
+              <MainLayout />
+            </BrowserRouter>
           </CompanyProvider>
         </ThemeProvider>
       </DndProvider>

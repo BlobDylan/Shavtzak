@@ -36,8 +36,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [company, setCompany] = useState<Company>(new Company([], [], []));
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const fetchCompanyData = (): void => {
+    setIsLoading(true);
     const storedCompanyData = JSON.parse(
       localStorage.getItem(LOCAL_STORAGE_COMPANY_DATA_KEY) || "{}"
     );
@@ -76,6 +78,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     setCompany(
       new Company(parsedSoldiers, parsedTaskInstances, fullMissionDays)
     );
+    setIsLoading(false);
   };
 
   const addSoldier = (soldier: Soldier): void => {
@@ -119,7 +122,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     roleIndex: number,
     taskInstance: TaskInstance
   ): void => {
-
     taskInstance.assignNewSoldier(soldier, roleIndex);
   };
 
@@ -149,7 +151,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const generateAssignmentForTaskInstance = (taskInstance: TaskInstance) => {
     let sortedSoldiers = company.soldiers.sort((s1, s2) => {
-      return timeSinceLastMission(s2, taskInstance.startTime) - timeSinceLastMission(s1, taskInstance.startTime);
+      return (
+        timeSinceLastMission(s2, taskInstance.startTime) -
+        timeSinceLastMission(s1, taskInstance.startTime)
+      );
     });
     debugger;
     for (let i = 0; i < taskInstance.task.roles.length; i++) {
@@ -160,16 +165,20 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       );
       if (assignedSoldier) {
         assignSoldierToTaskInstance(assignedSoldier, i, taskInstance);
-        sortedSoldiers = sortedSoldiers.filter(
-          (soldier) => { return soldier.name !== assignedSoldier.name }
-        );
+        sortedSoldiers = sortedSoldiers.filter((soldier) => {
+          return soldier.name !== assignedSoldier.name;
+        });
       }
     }
   };
 
   const generateAssignments = (missionDay: MissionDay): void => {
     try {
-      const sortedTaskInstances = company.getRelevantTaskInstances(missionDay).sort((a, b) => { return a.startTime.getTime() - b.startTime.getTime() });
+      const sortedTaskInstances = company
+        .getRelevantTaskInstances(missionDay)
+        .sort((a, b) => {
+          return a.startTime.getTime() - b.startTime.getTime();
+        });
       for (const taskInstance of sortedTaskInstances) {
         generateAssignmentForTaskInstance(taskInstance);
       }
@@ -183,11 +192,24 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     taskInstanceStartTime: Date
   ): number => {
     const sortedTaskInstancesHistory = company.taskInstances
-      .filter((taskInstance) => { return taskInstance.assignedSoldiers.some((s) => {return s.name === soldier.name } )})
-      .filter((taskInstance) => { return taskInstance.startTime.getTime() <= taskInstanceStartTime.getTime() })
-      .sort((a, b) => { return b.startTime.getTime() - a.startTime.getTime() });
+      .filter((taskInstance) => {
+        return taskInstance.assignedSoldiers.some((s) => {
+          return s.name === soldier.name;
+        });
+      })
+      .filter((taskInstance) => {
+        return (
+          taskInstance.startTime.getTime() <= taskInstanceStartTime.getTime()
+        );
+      })
+      .sort((a, b) => {
+        return b.startTime.getTime() - a.startTime.getTime();
+      });
     if (sortedTaskInstancesHistory.length > 0) {
-      return taskInstanceStartTime.getTime() - sortedTaskInstancesHistory[0].startTime.getTime();
+      return (
+        taskInstanceStartTime.getTime() -
+        sortedTaskInstancesHistory[0].startTime.getTime()
+      );
     }
 
     return Number.MAX_VALUE;
