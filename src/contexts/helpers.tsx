@@ -10,7 +10,7 @@ export const generateMissingMissionDays = (
         date.setDate(date.getDate() + i);
         MissionDay.setToStartOfDay(date);
         if (!missionDays.some((existingMissionDay) => { return existingMissionDay.startOfDay.getDate() == date.getDate() })) {
-            missionDays.push(new MissionDay(date, [], []));
+            missionDays.push(new MissionDay(date, []));
         }
     }
 

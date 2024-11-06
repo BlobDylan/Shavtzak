@@ -24,3 +24,5 @@ dist-ssr
 *.sw?
 
 */ConstData.const.tsx
+.npmrc
+.package-lock.json
