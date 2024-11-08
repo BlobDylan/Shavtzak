@@ -14,22 +14,9 @@ function LeftPaneContainer() {
       display={"flex"}
       flexDirection={"column"}
       alignItems={"center"}
-      sx={{ padding: "1rem" }}
-      width="100%"
+      width="90vw"
     >
       ``
-      <Button
-        sx={{ backgroundColor: "primary.main" }}
-        onClick={() => resetCompanyData()}
-      >
-        Reset Data
-      </Button>
-      <Button
-        sx={{ backgroundColor: "primary.main" }}
-        onClick={() => saveCompanyData(companyContext.company)}
-      >
-        Save Data
-      </Button>
       <Stack
         spacing={1}
         display={"flex"}
@@ -40,6 +27,26 @@ function LeftPaneContainer() {
         <Platoon platoonNum={1} />
         <Platoon platoonNum={2} />
         <Platoon platoonNum={3} />
+      </Stack>
+      <Stack
+        direction={"row"}
+        spacing={2}
+        margin={2}
+        width="100%"
+        justifyContent={"space-between"}
+      >
+        <Button
+          sx={{ backgroundColor: "primary.main", marginTop: "1rem" }}
+          onClick={() => resetCompanyData()}
+        >
+          Reset Data
+        </Button>
+        <Button
+          sx={{ backgroundColor: "primary.main", marginTop: "1rem" }}
+          onClick={() => saveCompanyData(companyContext.company)}
+        >
+          Save Data
+        </Button>
       </Stack>
     </Box>
   );

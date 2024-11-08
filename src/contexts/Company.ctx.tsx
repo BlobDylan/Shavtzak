@@ -3,7 +3,6 @@ import { Company } from "../Componenets/shared/Company.model";
 import { Soldier } from "../Componenets/shared/Soldier.model";
 import { LOCAL_STORAGE_COMPANY_DATA_KEY } from "../apis/Consts";
 import { Task, TaskInstance } from "../Componenets/shared/Task.model";
-import { SoldierRole } from "../Componenets/shared/SoldierRole.enum";
 import { MissionDay } from "../Componenets/shared/MissionDay.model";
 import { generateMissingMissionDays } from "./helpers";
 import {
@@ -28,6 +27,7 @@ export type CompanyContextType = {
   ) => void;
   generateDefaultTasks: (missionDay: MissionDay) => void;
   generateAssignments: (missionDay: MissionDay) => void;
+  getUniqueTasks: () => Task[];
 };
 
 const CompanyContext = createContext<CompanyContextType | null>(null);
@@ -93,6 +93,16 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     setCompany(
       new Company(newSoldiers, company.taskInstances, company.missionDays)
     );
+  };
+
+  // keep only one of every task type that exists in the company
+  const getUniqueTasks = (): Task[] => {
+    return company.taskInstances
+      .map((taskInstance) => taskInstance.task)
+      .filter(
+        (value, index, self) =>
+          self.findIndex((t) => t.type === value.type) === index
+      );
   };
 
   const generateDefaultTasks = (missionDay: MissionDay): void => {
@@ -226,6 +236,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         removeSoldierFromTaskInstance,
         generateDefaultTasks,
         generateAssignments,
+        getUniqueTasks,
       }}
     >
       {children}

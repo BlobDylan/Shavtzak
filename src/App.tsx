@@ -24,7 +24,13 @@ const MainLayout = () => {
   return (
     <>
       <Navbar />
-      <div style={{ flex: 1 }}>
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+        }}
+      >
         <Routes>
           <Route path="/Soldiers" element={<LeftPaneContainer />} />
           <Route path="/" element={<TasksContainer />} />

@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Toolbar, Typography } from "@mui/material";
+import { Box, Button, Toolbar } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import { useNavigate } from "react-router-dom";
 
@@ -7,7 +7,7 @@ function Navbar() {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar position="static" sx={{ backgroundColor: "primary.main" }}>
         <Toolbar>
           <Button
             color="inherit"
