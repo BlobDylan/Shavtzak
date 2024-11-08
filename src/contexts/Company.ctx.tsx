@@ -217,7 +217,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     soldier: Soldier,
     taskInstanceStartTime: Date
   ): number => {
-    debugger;
     const sortedTaskInstancesHistory = company.taskInstances
       .filter((taskInstance) => { return taskInstance.assignedSoldiers.some((s) => {return s?.name === soldier.name } )})
       .filter((taskInstance) => { return taskInstance.startTime.getTime() <= taskInstanceStartTime.getTime() })
