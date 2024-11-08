@@ -14,6 +14,7 @@ import {
 } from "../../contexts/Company.ctx";
 import { useState} from "react";
 import { Soldier } from "../shared/Soldier.model";
+import { toReadableHourAndMinutes } from "../../contexts/helpers";
 
 
 export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
@@ -42,13 +43,13 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
     >
       <Stack direction={"column"} display={"flex"} alignItems={"center"}>
         <Typography variant={"body1"} color="white" marginTop={2}>
-          <span>
-            {taskInstance.task.type}-
-            {taskInstance.startTime.toLocaleTimeString()}-
-            {new Date(
-              taskInstance.startTime.getTime() +
-                taskInstance.duration * 60 * 60 * 1000
-            ).toLocaleTimeString()}
+          <span dir="rtl">
+            {
+              `${taskInstance.task.type} ${toReadableHourAndMinutes(new Date(
+                taskInstance.startTime.getTime() +
+                  taskInstance.duration * 60 * 60 * 1000
+              ))} - ${toReadableHourAndMinutes(taskInstance.startTime)}`
+            }
           </span>
         </Typography>
         <Stack direction={"row"} spacing={2} margin={2} marginBottom={3}>

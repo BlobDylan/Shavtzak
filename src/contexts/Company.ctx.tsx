@@ -45,7 +45,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     );
 
     const parsedSoldiers: Soldier[] = [];
-    for (let soldier of storedCompanyData.soldiers ?? predefinedSoldiers) {
+    for (let soldier of predefinedSoldiers) {
       soldier = new Soldier(soldier.platoon, soldier.name, soldier.roles);
       parsedSoldiers.push(soldier);
     }
@@ -149,29 +149,49 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   const firstSuitableSoldier = (
     taskInstance: TaskInstance,
     roleIndex: number,
-    soldiers: Soldier[]
+    soldiers: Soldier[],
+    organicPlatoon: number | null,
   ) => {
     for (const soldier of soldiers) {
+      // enforce organicity if required
+      if (taskInstance.task.isRequireOrganicity && organicPlatoon && soldier.platoon !== organicPlatoon) {
+        continue
+      }
+
       if (soldier.roles.includes(taskInstance.task.roles[roleIndex])) {
         return soldier;
       }
     }
+
     return null;
   };
 
-  const generateAssignmentForTaskInstance = (taskInstance: TaskInstance) => {
+  const generateAssignmentForTaskInstance = (taskInstance: TaskInstance, missionDay: MissionDay) => {
+    // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
     let sortedSoldiers = company.soldiers.sort((s1, s2) => {
       return (
         timeSinceLastMission(s2, taskInstance.startTime) -
         timeSinceLastMission(s1, taskInstance.startTime)
       );
     });
-    debugger;
+
+    // Remove excluded soldiers from the list
+    sortedSoldiers = sortedSoldiers.filter((soldier) => {
+      return !missionDay.excludedSoldiers.some((excludedSoldier) => { return excludedSoldier.name === soldier.name });
+    });
+
     for (let i = 0; i < taskInstance.task.roles.length; i++) {
+      // Skip already roles that have already been manually assigned
+      if (taskInstance.assignedSoldiers[i]) {
+        continue;
+      }
+
+      const organicPlatoon = taskInstance.getOrganicPlatoon();  // to be used only if the task requires organicity
       const assignedSoldier = firstSuitableSoldier(
         taskInstance,
         i,
-        sortedSoldiers
+        sortedSoldiers,
+        organicPlatoon
       );
       if (assignedSoldier) {
         assignSoldierToTaskInstance(assignedSoldier, i, taskInstance);
@@ -184,13 +204,9 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const generateAssignments = (missionDay: MissionDay): void => {
     try {
-      const sortedTaskInstances = company
-        .getRelevantTaskInstances(missionDay)
-        .sort((a, b) => {
-          return a.startTime.getTime() - b.startTime.getTime();
-        });
+      const sortedTaskInstances = company.getRelevantTaskInstances(missionDay).sort((a, b) => { return a.startTime.getTime() - b.startTime.getTime() });
       for (const taskInstance of sortedTaskInstances) {
-        generateAssignmentForTaskInstance(taskInstance);
+        generateAssignmentForTaskInstance(taskInstance, missionDay);
       }
     } catch (error) {
       enqueueSnackbar(String(error), { variant: "error" });
@@ -202,19 +218,9 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     taskInstanceStartTime: Date
   ): number => {
     const sortedTaskInstancesHistory = company.taskInstances
-      .filter((taskInstance) => {
-        return taskInstance.assignedSoldiers.some((s) => {
-          return s.name === soldier.name;
-        });
-      })
-      .filter((taskInstance) => {
-        return (
-          taskInstance.startTime.getTime() <= taskInstanceStartTime.getTime()
-        );
-      })
-      .sort((a, b) => {
-        return b.startTime.getTime() - a.startTime.getTime();
-      });
+      .filter((taskInstance) => { return taskInstance.assignedSoldiers.some((s) => {return s?.name === soldier.name } )})
+      .filter((taskInstance) => { return taskInstance.startTime.getTime() <= taskInstanceStartTime.getTime() })
+      .sort((a, b) => { return b.startTime.getTime() - a.startTime.getTime() });
     if (sortedTaskInstancesHistory.length > 0) {
       return (
         taskInstanceStartTime.getTime() -

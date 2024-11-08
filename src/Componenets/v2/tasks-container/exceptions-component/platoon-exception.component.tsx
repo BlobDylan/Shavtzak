@@ -1,6 +1,6 @@
-import { Accordion, AccordionSummary, Checkbox, AccordionDetails, DialogTitle, DialogContent, DialogContentText, TextField, FormGroup, FormControlLabel, DialogActions, Button } from "@mui/material";
+import { Accordion, AccordionSummary, Checkbox, AccordionDetails } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { style, Stack, spacing, margin } from "@mui/system";
+import { Stack } from "@mui/system";
 import { useCompanyContext, CompanyContextType } from "../../../../contexts/Company.ctx";
 import { Soldier } from "../../../shared/Soldier.model";
 import SoldierExceptionComponent from "./soldier-exception.component";
