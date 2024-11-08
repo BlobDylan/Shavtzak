@@ -27,6 +27,12 @@ export class TaskInstance {
     this.validate();
   }
 
+  getEndDate(): Date {
+    const endDate = new Date(this.startTime);
+    endDate.setTime(endDate.getTime() + this.duration * 60 * 60 * 1000);
+    return endDate;
+  }
+
   validate(): void {
     if (this.duration < 0) {
       throw new Error("Duration cannot be negative");
@@ -59,14 +65,6 @@ export class TaskInstance {
       throw new Error("Soldier not assigned to task");
     }
     this.assignedSoldiers.splice(index, 1);
-  }
-
-  getOrganicPlatoon(): number | null {
-    if (this.assignedSoldiers.length === 0) {
-      return null
-    }
-
-    return this.assignedSoldiers[0].platoon;
   }
 }
 
