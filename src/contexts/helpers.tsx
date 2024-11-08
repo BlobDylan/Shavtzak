@@ -32,3 +32,10 @@ export const saveCompanyData = (company: Company) => {
         JSON.stringify(company)
     );
 };
+
+
+// Get Date object and returns date like: "13:47"
+export const toReadableHourAndMinutes = (d: Date): string => {
+    const options: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+    return d.toLocaleTimeString('en-GB', options);
+}

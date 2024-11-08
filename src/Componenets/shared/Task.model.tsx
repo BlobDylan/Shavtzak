@@ -60,14 +60,24 @@ export class TaskInstance {
     }
     this.assignedSoldiers.splice(index, 1);
   }
+
+  getOrganicPlatoon(): number | null {
+    if (this.assignedSoldiers.length === 0) {
+      return null
+    }
+
+    return this.assignedSoldiers[0].platoon;
+  }
 }
 
 export class Task {
   type: TaskType;
   roles: SoldierRole[];
+  isRequireOrganicity: boolean;
 
-  constructor(type: TaskType, roles: SoldierRole[]) {
+  constructor(type: TaskType, roles: SoldierRole[], isRequireOrganicity: boolean = false) {
     this.type = type;
+    this.isRequireOrganicity = isRequireOrganicity;
     this.roles = roles;
     this.validate();
   }
@@ -78,6 +88,9 @@ export class Task {
     }
     if (this.roles.length === 0) {
       throw new Error("Task must have at least one role");
+    }
+    if (this.roles.findIndex((sr) => { return sr === SoldierRole.COMMANDER }) > 0) {
+      throw new Error("Commander role must be the first one")
     }
   }
 }
