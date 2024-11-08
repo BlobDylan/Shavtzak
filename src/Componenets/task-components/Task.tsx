@@ -1,16 +1,30 @@
 import type { FC } from "react";
-import { Box, Typography, Stack, Menu, MenuItem, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  Menu,
+  MenuItem,
+  Button,
+} from "@mui/material";
 import { TaskInstance } from "../shared/Task.model";
 import {
   useCompanyContext,
   CompanyContextType,
 } from "../../contexts/Company.ctx";
-import { useState, Fragment } from "react";
+import { useState} from "react";
 import { Soldier } from "../shared/Soldier.model";
 import { toReadableHourAndMinutes } from "../../contexts/helpers";
 
+
 export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
   const companyContext = useCompanyContext() as CompanyContextType;
+  const platoonColors: { [key: number]: string } = {
+    1: "#fdefc0",
+    2: "#d9f3d0",
+    3: "#e3d0f0",
+    4: "primary.main",
+  };
 
   return (
     <Box
@@ -63,19 +77,27 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                   aria-expanded={open ? "true" : undefined}
                   key={index}
                   sx={{
-                    width: "110px",
-                    height: "50px",
-                    border: "3px dashed white",
-                    borderRadius: "5px",
+                    width: "150px",
+                    height: "25px",
+                    border: "3px solid white",
+                    blackborderRadius: "5px",
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
                     justifyContent: "center",
+                    fontSize: "12px",
+                    backgroundColor:
+                      platoonColors[
+                        taskInstance.assignedSoldiers[index] === undefined ||
+                        taskInstance.assignedSoldiers[index] === null
+                          ? 4
+                          : taskInstance.assignedSoldiers[index].platoon
+                      ] ?? "primary.main",
                   }}
                   onClick={handleClick}
                 >
-                  {role}
-                  <Typography color={"white"}>
+                  {!taskInstance.assignedSoldiers[index] && role}
+                  <Typography color={"black"}>
                     {taskInstance.assignedSoldiers[index] &&
                       taskInstance.assignedSoldiers[index].name}
                   </Typography>
