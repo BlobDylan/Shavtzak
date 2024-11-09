@@ -190,6 +190,9 @@ function TasksContainer() {
         currentMissionDay as MissionDay,
         mainPlatoonNum
       );
+      setCurrentMissionDayTaskInstances(
+        companyContext.company.getRelevantTaskInstances(currentMissionDay)
+      );
     }
   };
 
