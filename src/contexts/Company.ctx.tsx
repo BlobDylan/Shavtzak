@@ -10,6 +10,7 @@ import {
   predefinedSoldiers,
 } from "../ConstData.const";
 import { useSnackbar } from "notistack";
+import { TaskType } from "../Componenets/shared/TaskType.enum";
 
 export type CompanyContextType = {
   company: Company;
@@ -26,7 +27,7 @@ export type CompanyContextType = {
     taskInstance: TaskInstance
   ) => void;
   generateDefaultTasks: (missionDay: MissionDay) => void;
-  generateAssignments: (missionDay: MissionDay) => void;
+  generateAssignments: (missionDay: MissionDay, platoonNum: number) => void;
   getUniqueTasks: () => Task[];
 };
 
@@ -79,43 +80,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       new Company(parsedSoldiers, parsedTaskInstances, fullMissionDays)
     );
     setIsLoading(false);
-  };
-
-  const getLastTaskTypeAssigned = (): string | null => {
-    let latestTaskInstance: TaskInstance | null = null;
-    for (const taskInstance of company.taskInstances) {
-      if (
-        !latestTaskInstance ||
-        taskInstance.startTime > latestTaskInstance.startTime
-      ) {
-        latestTaskInstance = taskInstance;
-      }
-    }
-
-    if (latestTaskInstance) {
-      return latestTaskInstance.task.type;
-    }
-
-    return null;
-  };
-
-  // itterate over task instances find the latest task instance by start time and return the platoon number
-  const getLastOrganicPlatoonAssigned = (): number => {
-    let latestTaskInstance: TaskInstance | null = null;
-    for (const taskInstance of company.taskInstances) {
-      if (
-        !latestTaskInstance ||
-        taskInstance.startTime > latestTaskInstance.startTime
-      ) {
-        latestTaskInstance = taskInstance;
-      }
-    }
-
-    if (latestTaskInstance) {
-      return latestTaskInstance.getOrganicPlatoon();
-    }
-
-    return 0;
   };
 
   const addSoldier = (soldier: Soldier): void => {
@@ -187,14 +151,20 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     taskInstance: TaskInstance,
     roleIndex: number,
     soldiers: Soldier[],
-    organicPlatoon: number | null
+    mainPlatoonNum: number
   ) => {
     for (const soldier of soldiers) {
       // enforce organicity if required
       if (
         taskInstance.task.isRequireOrganicity &&
-        organicPlatoon &&
-        soldier.platoon !== organicPlatoon
+        soldier.platoon !== mainPlatoonNum
+      ) {
+        continue;
+      }
+      // let other platoons get the non organic tasks
+      if (
+        !taskInstance.task.isRequireOrganicity &&
+        soldier.platoon === mainPlatoonNum
       ) {
         continue;
       }
@@ -209,13 +179,14 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const generateAssignmentForTaskInstance = (
     taskInstance: TaskInstance,
-    missionDay: MissionDay
+    missionDay: MissionDay,
+    mainPlatoonNum: number
   ) => {
     // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
     let sortedSoldiers = company.soldiers.sort((s1, s2) => {
       return (
-        timeSinceLastMission(s2, taskInstance.startTime) -
-        timeSinceLastMission(s1, taskInstance.startTime)
+        timeSinceLastMission(s2, taskInstance) -
+        timeSinceLastMission(s1, taskInstance)
       );
     });
 
@@ -225,12 +196,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         return excludedSoldier.name === soldier.name;
       });
     });
-    let organicPlatoon = getLastOrganicPlatoonAssigned() - 1;
-    // let lastTaskTypeAssigned = getLastTaskTypeAssigned();
-    if (taskInstance.task.isRequireOrganicity) {
-      organicPlatoon++;
-      organicPlatoon = (organicPlatoon % 3) + 1;
-    }
 
     for (let i = 0; i < taskInstance.task.roles.length; i++) {
       // Skip already roles that have already been manually assigned
@@ -242,7 +207,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         taskInstance,
         i,
         sortedSoldiers,
-        organicPlatoon
+        mainPlatoonNum
       );
       if (assignedSoldier) {
         assignSoldierToTaskInstance(assignedSoldier, i, taskInstance);
@@ -253,7 +218,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const generateAssignments = (missionDay: MissionDay): void => {
+  const generateAssignments = (
+    missionDay: MissionDay,
+    mainPlatoonNum: number
+  ): void => {
     try {
       const sortedTaskInstances = company
         .getRelevantTaskInstances(missionDay)
@@ -261,7 +229,11 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
           return a.startTime.getTime() - b.startTime.getTime();
         });
       for (const taskInstance of sortedTaskInstances) {
-        generateAssignmentForTaskInstance(taskInstance, missionDay);
+        generateAssignmentForTaskInstance(
+          taskInstance,
+          missionDay,
+          mainPlatoonNum
+        );
       }
     } catch (error) {
       enqueueSnackbar(String(error), { variant: "error" });
@@ -270,25 +242,23 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const timeSinceLastMission = (
     soldier: Soldier,
-    taskInstanceStartTime: Date
+    taskInstance: TaskInstance
   ): number => {
     const sortedTaskInstancesHistory = company.taskInstances
-      .filter((taskInstance) => {
-        return taskInstance.assignedSoldiers.some((s) => {
+      .filter((ti) => {
+        return ti.assignedSoldiers.some((s) => {
           return s?.name === soldier.name;
         });
       })
-      .filter((taskInstance) => {
-        return (
-          taskInstance.startTime.getTime() <= taskInstanceStartTime.getTime()
-        );
+      .filter((ti) => {
+        return ti.startTime.getTime() <= taskInstance.startTime.getTime();
       })
       .sort((a, b) => {
         return b.startTime.getTime() - a.startTime.getTime();
       });
     if (sortedTaskInstancesHistory.length > 0) {
       return (
-        taskInstanceStartTime.getTime() -
+        taskInstance.getEndDate().getTime() -
         sortedTaskInstancesHistory[0].startTime.getTime()
       );
     }

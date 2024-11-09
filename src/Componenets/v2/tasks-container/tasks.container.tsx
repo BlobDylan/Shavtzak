@@ -17,6 +17,11 @@ import {
   TableHead,
   TableRow,
   Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -132,6 +137,7 @@ const DisplayTaskSummary: FC<{ task: TaskModel; missionDay: MissionDay }> = ({
 
 function TasksContainer() {
   const [currentMissionDay, setMissionDay] = useState<MissionDay | null>();
+  const [mainPlatoonNum, setMainPlatoonNum] = useState<number>(1);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const companyContext = useCompanyContext() as CompanyContextType;
   const [currentMissionDayTaskInstances, setCurrentMissionDayTaskInstances] =
@@ -180,9 +186,9 @@ function TasksContainer() {
 
   const onClickedGenerateAssignment = () => {
     if (currentMissionDay) {
-      companyContext.generateAssignments(currentMissionDay as MissionDay);
-      setCurrentMissionDayTaskInstances(
-        companyContext.company.getRelevantTaskInstances(currentMissionDay)
+      companyContext.generateAssignments(
+        currentMissionDay as MissionDay,
+        mainPlatoonNum
       );
     }
   };
@@ -193,6 +199,9 @@ function TasksContainer() {
   ) => {
     setMissionDay(companyContext.company.missionDays[value - 1]);
     setCurrentPage(value);
+  };
+  const handleChangeMainPlatoonChange = (event: SelectChangeEvent) => {
+    setMainPlatoonNum(Number(event.target.value));
   };
 
   if (currentMissionDay === null || currentMissionDay === undefined)
@@ -247,13 +256,33 @@ function TasksContainer() {
                 </Box>
               )}
               <Box flexGrow={1}></Box>
+
               {!(currentMissionDayTaskInstances.length == 0) && (
-                <Button
-                  onClick={onClickedGenerateAssignment}
-                  sx={{ backgroundColor: "primary.main" }}
-                >
-                  Generate Assignment
-                </Button>
+                <>
+                  <Button
+                    onClick={onClickedGenerateAssignment}
+                    sx={{ backgroundColor: "primary.main" }}
+                  >
+                    Generate Assignment
+                  </Button>
+                  <FormControl variant="filled" sx={{ m: 1, width: 150 }}>
+                    <InputLabel id="demo-simple-select-standard-label">
+                      {"מחלקה עיקרית (סיור)"}
+                    </InputLabel>
+                    <Select
+                      labelId="demo-simple-select-standard-label"
+                      id="demo-simple-select"
+                      value={mainPlatoonNum.toString()}
+                      sx={{ backgroundColor: "primary.main", color: "pink" }}
+                      label="מחלקה עיקרית (סיור)"
+                      onChange={handleChangeMainPlatoonChange}
+                    >
+                      <MenuItem value={1}>1</MenuItem>
+                      <MenuItem value={2}>2</MenuItem>
+                      <MenuItem value={3}>3</MenuItem>
+                    </Select>
+                  </FormControl>
+                </>
               )}
             </Stack>
             <Grid container rowSpacing={1} columns={12} columnSpacing={1}>

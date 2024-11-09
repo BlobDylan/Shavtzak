@@ -38,6 +38,11 @@ export class TaskInstance {
       throw new Error("Start time cannot be null");
     }
   }
+  getEndDate(): Date {
+    const endDate = new Date(this.startTime);
+    endDate.setTime(endDate.getTime() + this.duration * 60 * 60 * 1000);
+    return endDate;
+  }
 
   assignNewSoldier(soldier: Soldier, roleIndex: number): void {
     const role = this.task.roles[roleIndex];
