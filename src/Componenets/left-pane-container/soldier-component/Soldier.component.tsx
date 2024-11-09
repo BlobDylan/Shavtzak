@@ -1,6 +1,4 @@
-import { useDrag } from "react-dnd";
-
-import { Typography, Box, IconButton, Stack, Checkbox } from "@mui/material";
+import { Typography, Box, IconButton, Stack } from "@mui/material";
 
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Soldier } from "../../shared/Soldier.model";
@@ -26,7 +24,7 @@ function SoldierViewComponent(props: { soldier: Soldier }) {
         padding: "0.5rem",
       }}
     >
-      <Checkbox />
+      <Box flexGrow={1}></Box>
       <Stack
         display={"flex"}
         flexDirection={"column"}
@@ -38,6 +36,7 @@ function SoldierViewComponent(props: { soldier: Soldier }) {
           {prettyPrintRoles(props.soldier.roles)}
         </Typography>
       </Stack>
+      <Box flexGrow={1}></Box>
       <IconButton onClick={() => companyContext.deleteSoldier(props.soldier)}>
         <DeleteIcon />
       </IconButton>

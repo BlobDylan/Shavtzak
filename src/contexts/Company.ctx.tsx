@@ -4,7 +4,10 @@ import { Soldier } from "../Componenets/shared/Soldier.model";
 import { LOCAL_STORAGE_COMPANY_DATA_KEY } from "../apis/Consts";
 import { Task, TaskInstance } from "../Componenets/shared/Task.model";
 import { MissionDay } from "../Componenets/shared/MissionDay.model";
-import { generateMissingMissionDays, toReadableHourAndMinutes } from "./helpers";
+import {
+  generateMissingMissionDays,
+  toReadableHourAndMinutes,
+} from "./helpers";
 import {
   predefinedTaskInstances,
   predefinedSoldiers,
@@ -151,12 +154,15 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     taskInstance: TaskInstance,
     roleIndex: number,
     soldiers: Soldier[],
-    organicPlatoonNum: number,
+    organicPlatoonNum: number
   ) => {
     for (const soldier of soldiers) {
       // enforce organicity if required
-      if (taskInstance.task.isRequireOrganicity && soldier.platoon !== organicPlatoonNum) {
-        continue
+      if (
+        taskInstance.task.isRequireOrganicity &&
+        soldier.platoon !== organicPlatoonNum
+      ) {
+        continue;
       }
 
       if (soldier.roles.includes(taskInstance.task.roles[roleIndex])) {
@@ -169,36 +175,61 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Calculate the optimal organic platoon num by selecting the platoon with the most soldiers that are not assigned to the task that the has the lowest time since last mission for every soldier.
   // considering all the soldiers must be from the same platoon for this task
-  const calculateOptimalOrganicPlatoonNum = (taskInstance: TaskInstance, sortedSoldiers: Soldier[]) => {
-    const bestSquads: (Soldier[])[] = []
-    for (let platoonNum = 1; platoonNum <= 3; platoonNum++ ) {
-      const bestSquadForCurrentPlatoon = calculateSquadForOrganicPlatoon(taskInstance, sortedSoldiers, platoonNum);
+  const calculateOptimalOrganicPlatoonNum = (
+    taskInstance: TaskInstance,
+    sortedSoldiers: Soldier[]
+  ) => {
+    const bestSquads: Soldier[][] = [];
+    for (let platoonNum = 1; platoonNum <= 3; platoonNum++) {
+      const bestSquadForCurrentPlatoon = calculateSquadForOrganicPlatoon(
+        taskInstance,
+        sortedSoldiers,
+        platoonNum
+      );
       if (bestSquadForCurrentPlatoon) {
         bestSquads.push(bestSquadForCurrentPlatoon);
       }
     }
     if (bestSquads.length === 0) {
-      alert(`Failed to find organic squad for task: ${taskInstance.task.type}  ${toReadableHourAndMinutes(taskInstance.startTime)}`);
-      throw new Error("No organic squads are found for this this task. " + taskInstance.task.type);
+      alert(
+        `Failed to find organic squad for task: ${taskInstance.task.type}  ${toReadableHourAndMinutes(taskInstance.startTime)}`
+      );
+      throw new Error(
+        "No organic squads are found for this this task. " +
+          taskInstance.task.type
+      );
     }
-    const platoonWithTheLongestTimeSinceLastMission = bestSquads.reduce((prev, current) => {
-      return Math.min(timeSinceLastMission(current[0], taskInstance), timeSinceLastMission(current[1], taskInstance))
-       > Math.min(timeSinceLastMission(prev[0], taskInstance), timeSinceLastMission(prev[1], taskInstance))
-        ? current : prev;
-    });
+    const platoonWithTheLongestTimeSinceLastMission = bestSquads.reduce(
+      (prev, current) => {
+        return Math.min(
+          timeSinceLastMission(current[0], taskInstance),
+          timeSinceLastMission(current[1], taskInstance)
+        ) >
+          Math.min(
+            timeSinceLastMission(prev[0], taskInstance),
+            timeSinceLastMission(prev[1], taskInstance)
+          )
+          ? current
+          : prev;
+      }
+    );
     return platoonWithTheLongestTimeSinceLastMission[0].platoon;
   };
 
-  const calculateSquadForOrganicPlatoon = (taskInstance: TaskInstance, sortedSoldiers: Soldier[], organicPlatoonNum: number): Soldier[] | null => {
-    const platoonSquad: Soldier[] = []
-    let sortedSoldiersCopy = [...sortedSoldiers]
+  const calculateSquadForOrganicPlatoon = (
+    taskInstance: TaskInstance,
+    sortedSoldiers: Soldier[],
+    organicPlatoonNum: number
+  ): Soldier[] | null => {
+    const platoonSquad: Soldier[] = [];
+    let sortedSoldiersCopy = [...sortedSoldiers];
 
     for (let i = 0; i < taskInstance.task.roles.length; i++) {
       const selectedSoldier = firstSuitableSoldier(
         taskInstance,
         i,
         sortedSoldiersCopy,
-        organicPlatoonNum,
+        organicPlatoonNum
       );
       if (selectedSoldier === null) {
         return null;
@@ -213,18 +244,29 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     return platoonSquad;
   };
 
-  const generateAssignmentForTaskInstance = (taskInstance: TaskInstance, missionDay: MissionDay) => {
+  const generateAssignmentForTaskInstance = (
+    taskInstance: TaskInstance,
+    missionDay: MissionDay
+  ) => {
     // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
     let sortedSoldiers = company.soldiers.sort((s1, s2) => {
-      return timeSinceLastMission(s2, taskInstance) - timeSinceLastMission(s1, taskInstance);
+      return (
+        timeSinceLastMission(s2, taskInstance) -
+        timeSinceLastMission(s1, taskInstance)
+      );
     });
 
     // Remove excluded soldiers from the list
     sortedSoldiers = sortedSoldiers.filter((soldier) => {
-      return !missionDay.excludedSoldiers.some((excludedSoldier) => { return excludedSoldier.name === soldier.name });
+      return !missionDay.excludedSoldiers.some((excludedSoldier) => {
+        return excludedSoldier.name === soldier.name;
+      });
     });
 
-    const organicPlatoonNum = calculateOptimalOrganicPlatoonNum(taskInstance, sortedSoldiers);
+    const organicPlatoonNum = calculateOptimalOrganicPlatoonNum(
+      taskInstance,
+      sortedSoldiers
+    );
     for (let i = 0; i < taskInstance.task.roles.length; i++) {
       // Skip already roles that have already been manually assigned
       if (taskInstance.assignedSoldiers[i]) {
@@ -235,7 +277,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         taskInstance,
         i,
         sortedSoldiers,
-        organicPlatoonNum,
+        organicPlatoonNum
       );
       if (assignedSoldier) {
         assignSoldierToTaskInstance(assignedSoldier, i, taskInstance);
@@ -248,7 +290,11 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const generateAssignments = (missionDay: MissionDay): void => {
     try {
-      const sortedTaskInstances = company.getRelevantTaskInstances(missionDay).sort((a, b) => { return a.startTime.getTime() - b.startTime.getTime() });
+      const sortedTaskInstances = company
+        .getRelevantTaskInstances(missionDay)
+        .sort((a, b) => {
+          return a.startTime.getTime() - b.startTime.getTime();
+        });
       for (const taskInstance of sortedTaskInstances) {
         generateAssignmentForTaskInstance(taskInstance, missionDay);
       }
@@ -262,9 +308,17 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     taskInstance: TaskInstance
   ): number => {
     const sortedTaskInstancesHistory = company.taskInstances
-      .filter((ti) => { return ti.assignedSoldiers.some((s) => {return s?.name === soldier.name } )})
-      .filter((ti) => { return ti.startTime.getTime() <= taskInstance.startTime.getTime() })
-      .sort((a, b) => { return b.getEndDate().getTime() - a.getEndDate().getTime() });
+      .filter((ti) => {
+        return ti.assignedSoldiers.some((s) => {
+          return s?.name === soldier.name;
+        });
+      })
+      .filter((ti) => {
+        return ti.startTime.getTime() <= taskInstance.startTime.getTime();
+      })
+      .sort((a, b) => {
+        return b.getEndDate().getTime() - a.getEndDate().getTime();
+      });
     if (sortedTaskInstancesHistory.length > 0) {
       return (
         taskInstance.getEndDate().getTime() -
