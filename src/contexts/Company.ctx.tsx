@@ -27,7 +27,7 @@ export type CompanyContextType = {
     taskInstance: TaskInstance
   ) => void;
   generateDefaultTasks: (missionDay: MissionDay) => void;
-  generateAssignments: (missionDay: MissionDay) => void;
+  generateAssignments: (missionDay: MissionDay, mainPlatoonNum: number) => void;
   getUniqueTasks: () => Task[];
 };
 
@@ -158,10 +158,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       if (taskInstance.task.isRequireOrganicity && soldier.platoon !== mainPlatoonNum) {
         continue
       }
-      // let other platoons get the non organic tasks
-      if (!taskInstance.task.isRequireOrganicity && soldier.platoon === mainPlatoonNum) {
-        continue
-      }
 
       if (soldier.roles.includes(taskInstance.task.roles[roleIndex])) {
         return soldier;
@@ -174,10 +170,14 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   const generateAssignmentForTaskInstance = (taskInstance: TaskInstance, missionDay: MissionDay, mainPlatoonNum: number) => {
     // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
     let sortedSoldiers = company.soldiers.sort((s1, s2) => {
-      return (
-        timeSinceLastMission(s2, taskInstance) -
-        timeSinceLastMission(s1, taskInstance)
-      );
+      const res = timeSinceLastMission(s2, taskInstance) - timeSinceLastMission(s1, taskInstance)
+
+      // if the time difference is the same - prefer soldiers that are not from the main platoon
+      if (res === 0) {
+        return s1.platoon === mainPlatoonNum ? 1 : -1;
+      }
+
+      return res;
     });
 
     // Remove excluded soldiers from the list
@@ -224,11 +224,11 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     const sortedTaskInstancesHistory = company.taskInstances
       .filter((ti) => { return ti.assignedSoldiers.some((s) => {return s?.name === soldier.name } )})
       .filter((ti) => { return ti.startTime.getTime() <= taskInstance.startTime.getTime() })
-      .sort((a, b) => { return b.startTime.getTime() - a.startTime.getTime() });
+      .sort((a, b) => { return b.getEndDate().getTime() - a.getEndDate().getTime() });
     if (sortedTaskInstancesHistory.length > 0) {
       return (
         taskInstance.getEndDate().getTime() -
-        sortedTaskInstancesHistory[0].startTime.getTime()
+        sortedTaskInstancesHistory[0].getEndDate().getTime()
       );
     }
 
