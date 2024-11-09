@@ -61,9 +61,9 @@ export class TaskInstance {
     this.assignedSoldiers.splice(index, 1);
   }
 
-  getOrganicPlatoon(): number | null {
+  getOrganicPlatoon(): number {
     if (this.assignedSoldiers.length === 0) {
-      return null
+      return 0;
     }
 
     return this.assignedSoldiers[0].platoon;
@@ -75,7 +75,11 @@ export class Task {
   roles: SoldierRole[];
   isRequireOrganicity: boolean;
 
-  constructor(type: TaskType, roles: SoldierRole[], isRequireOrganicity: boolean = false) {
+  constructor(
+    type: TaskType,
+    roles: SoldierRole[],
+    isRequireOrganicity: boolean = false
+  ) {
     this.type = type;
     this.isRequireOrganicity = isRequireOrganicity;
     this.roles = roles;
@@ -89,8 +93,12 @@ export class Task {
     if (this.roles.length === 0) {
       throw new Error("Task must have at least one role");
     }
-    if (this.roles.findIndex((sr) => { return sr === SoldierRole.COMMANDER }) > 0) {
-      throw new Error("Commander role must be the first one")
+    if (
+      this.roles.findIndex((sr) => {
+        return sr === SoldierRole.COMMANDER;
+      }) > 0
+    ) {
+      throw new Error("Commander role must be the first one");
     }
   }
 }

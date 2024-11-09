@@ -81,6 +81,43 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     setIsLoading(false);
   };
 
+  const getLastTaskTypeAssigned = (): string | null => {
+    let latestTaskInstance: TaskInstance | null = null;
+    for (const taskInstance of company.taskInstances) {
+      if (
+        !latestTaskInstance ||
+        taskInstance.startTime > latestTaskInstance.startTime
+      ) {
+        latestTaskInstance = taskInstance;
+      }
+    }
+
+    if (latestTaskInstance) {
+      return latestTaskInstance.task.type;
+    }
+
+    return null;
+  };
+
+  // itterate over task instances find the latest task instance by start time and return the platoon number
+  const getLastOrganicPlatoonAssigned = (): number => {
+    let latestTaskInstance: TaskInstance | null = null;
+    for (const taskInstance of company.taskInstances) {
+      if (
+        !latestTaskInstance ||
+        taskInstance.startTime > latestTaskInstance.startTime
+      ) {
+        latestTaskInstance = taskInstance;
+      }
+    }
+
+    if (latestTaskInstance) {
+      return latestTaskInstance.getOrganicPlatoon();
+    }
+
+    return 0;
+  };
+
   const addSoldier = (soldier: Soldier): void => {
     const newSoldiers = [...company.soldiers, soldier];
     setCompany(
@@ -150,12 +187,16 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     taskInstance: TaskInstance,
     roleIndex: number,
     soldiers: Soldier[],
-    organicPlatoon: number | null,
+    organicPlatoon: number | null
   ) => {
     for (const soldier of soldiers) {
       // enforce organicity if required
-      if (taskInstance.task.isRequireOrganicity && organicPlatoon && soldier.platoon !== organicPlatoon) {
-        continue
+      if (
+        taskInstance.task.isRequireOrganicity &&
+        organicPlatoon &&
+        soldier.platoon !== organicPlatoon
+      ) {
+        continue;
       }
 
       if (soldier.roles.includes(taskInstance.task.roles[roleIndex])) {
@@ -166,7 +207,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     return null;
   };
 
-  const generateAssignmentForTaskInstance = (taskInstance: TaskInstance, missionDay: MissionDay) => {
+  const generateAssignmentForTaskInstance = (
+    taskInstance: TaskInstance,
+    missionDay: MissionDay
+  ) => {
     // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
     let sortedSoldiers = company.soldiers.sort((s1, s2) => {
       return (
@@ -177,8 +221,16 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
     // Remove excluded soldiers from the list
     sortedSoldiers = sortedSoldiers.filter((soldier) => {
-      return !missionDay.excludedSoldiers.some((excludedSoldier) => { return excludedSoldier.name === soldier.name });
+      return !missionDay.excludedSoldiers.some((excludedSoldier) => {
+        return excludedSoldier.name === soldier.name;
+      });
     });
+    let organicPlatoon = getLastOrganicPlatoonAssigned() - 1;
+    // let lastTaskTypeAssigned = getLastTaskTypeAssigned();
+    if (taskInstance.task.isRequireOrganicity) {
+      organicPlatoon++;
+      organicPlatoon = (organicPlatoon % 3) + 1;
+    }
 
     for (let i = 0; i < taskInstance.task.roles.length; i++) {
       // Skip already roles that have already been manually assigned
@@ -186,7 +238,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         continue;
       }
 
-      const organicPlatoon = taskInstance.getOrganicPlatoon();  // to be used only if the task requires organicity
       const assignedSoldier = firstSuitableSoldier(
         taskInstance,
         i,
@@ -204,7 +255,11 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const generateAssignments = (missionDay: MissionDay): void => {
     try {
-      const sortedTaskInstances = company.getRelevantTaskInstances(missionDay).sort((a, b) => { return a.startTime.getTime() - b.startTime.getTime() });
+      const sortedTaskInstances = company
+        .getRelevantTaskInstances(missionDay)
+        .sort((a, b) => {
+          return a.startTime.getTime() - b.startTime.getTime();
+        });
       for (const taskInstance of sortedTaskInstances) {
         generateAssignmentForTaskInstance(taskInstance, missionDay);
       }
@@ -218,9 +273,19 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     taskInstanceStartTime: Date
   ): number => {
     const sortedTaskInstancesHistory = company.taskInstances
-      .filter((taskInstance) => { return taskInstance.assignedSoldiers.some((s) => {return s?.name === soldier.name } )})
-      .filter((taskInstance) => { return taskInstance.startTime.getTime() <= taskInstanceStartTime.getTime() })
-      .sort((a, b) => { return b.startTime.getTime() - a.startTime.getTime() });
+      .filter((taskInstance) => {
+        return taskInstance.assignedSoldiers.some((s) => {
+          return s?.name === soldier.name;
+        });
+      })
+      .filter((taskInstance) => {
+        return (
+          taskInstance.startTime.getTime() <= taskInstanceStartTime.getTime()
+        );
+      })
+      .sort((a, b) => {
+        return b.startTime.getTime() - a.startTime.getTime();
+      });
     if (sortedTaskInstancesHistory.length > 0) {
       return (
         taskInstanceStartTime.getTime() -

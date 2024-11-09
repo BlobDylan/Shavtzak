@@ -21,6 +21,7 @@ import {
 
 import CloseIcon from "@mui/icons-material/Close";
 
+import { toReadableHourAndMinutes } from "../../../contexts/helpers";
 import {
   CompanyContextType,
   useCompanyContext,
@@ -42,8 +43,8 @@ const DisplayTasksSummary: FC<{ missionDay: MissionDay }> = ({
   const uniqueTasks = companyContext.getUniqueTasks();
   return (
     <>
-      {uniqueTasks.map((task: TaskModel) => (
-        <DisplayTaskSummary task={task} missionDay={missionDay} />
+      {uniqueTasks.map((task: TaskModel, index) => (
+        <DisplayTaskSummary task={task} key={index} missionDay={missionDay} />
       ))}
     </>
   );
@@ -67,37 +68,42 @@ const DisplayTaskSummary: FC<{ task: TaskModel; missionDay: MissionDay }> = ({
 
   return (
     <TableContainer component={Paper}>
-      <Typography align="center" marginTop={1}>
+      <Typography align="center" marginTop={1} variant="h5">
         {task.type}
       </Typography>
       <Table sx={{ minWidth: 800 }} aria-label="simple table">
-        <TableRow>
-          {task.roles.map((role: any) => (
-            <TableCell variant="head" align="center">
-              {role}
+        <TableHead>
+          <TableRow>
+            {task.roles.map((role: any, index) => (
+              <TableCell key={index} variant="head" align="center">
+                <Typography>{role}</Typography>
+              </TableCell>
+            ))}
+            <TableCell variant="head" align="center" width={"12%"}>
+              <Typography>שעות</Typography>
             </TableCell>
-          ))}
-          <TableCell variant="head" align="center">
-            שעות
-          </TableCell>
-        </TableRow>
+          </TableRow>
+        </TableHead>
         <TableBody>
           {taskinstances.map(
-            (taskInstance: TaskInstance) =>
+            (taskInstance: TaskInstance, index) =>
               taskInstance.task.type === task.type && (
-                <TableRow>
-                  {taskInstance.assignedSoldiers.map((soldier: Soldier) => (
-                    <TableCell
-                      sx={{
-                        backgroundColor: platoonColors[soldier.platoon],
-                        color: "black",
-                      }}
-                      size="small"
-                      align="right"
-                    >
-                      {soldier.name}
-                    </TableCell>
-                  ))}
+                <TableRow key={index}>
+                  {taskInstance.assignedSoldiers.map(
+                    (soldier: Soldier, index) => (
+                      <TableCell
+                        key={index}
+                        sx={{
+                          backgroundColor: platoonColors[soldier.platoon],
+                          color: "black",
+                        }}
+                        size="small"
+                        align="center"
+                      >
+                        <Typography>{soldier.name}</Typography>
+                      </TableCell>
+                    )
+                  )}
                   <TableCell
                     sx={{
                       backgroundColor: "text.primary",
@@ -106,7 +112,14 @@ const DisplayTaskSummary: FC<{ task: TaskModel; missionDay: MissionDay }> = ({
                     size="small"
                     align="right"
                   >
-                    {taskInstance.startTime.toLocaleTimeString()}
+                    <Typography>
+                      {` ${toReadableHourAndMinutes(
+                        new Date(
+                          taskInstance.startTime.getTime() +
+                            taskInstance.duration * 60 * 60 * 1000
+                        )
+                      )} - ${toReadableHourAndMinutes(taskInstance.startTime)}`}
+                    </Typography>
                   </TableCell>
                 </TableRow>
               )
@@ -166,7 +179,12 @@ function TasksContainer() {
   };
 
   const onClickedGenerateAssignment = () => {
-    companyContext.generateAssignments(currentMissionDay as MissionDay);
+    if (currentMissionDay) {
+      companyContext.generateAssignments(currentMissionDay as MissionDay);
+      setCurrentMissionDayTaskInstances(
+        companyContext.company.getRelevantTaskInstances(currentMissionDay)
+      );
+    }
   };
 
   const handlePageChange = (
@@ -192,19 +210,21 @@ function TasksContainer() {
         <Typography variant="h6">
           {currentMissionDay.startOfDay.toDateString()}
         </Typography>
-        {shouldShowExceptions && (
-          <ExceptionsComponent
-            missionDay={currentMissionDay}
-          ></ExceptionsComponent>
-        )}
-        <Button
-          sx={{ backgroundColor: "primary.main" }}
-          onClick={() => {
-            setShouldShowExceptions(!shouldShowExceptions);
-          }}
-        >
-          Toggle exceptions select
-        </Button>
+        <Box display={"flex"} flexDirection={"column"} alignItems={"center"}>
+          {shouldShowExceptions && (
+            <ExceptionsComponent
+              missionDay={currentMissionDay}
+            ></ExceptionsComponent>
+          )}
+          <Button
+            sx={{ backgroundColor: "primary.main" }}
+            onClick={() => {
+              setShouldShowExceptions(!shouldShowExceptions);
+            }}
+          >
+            Toggle exceptions select
+          </Button>
+        </Box>
         {!shouldShowExceptions && (
           <>
             <Stack spacing={1}>
