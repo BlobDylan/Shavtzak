@@ -27,6 +27,12 @@ export class TaskInstance {
     this.validate();
   }
 
+  getEndDate(): Date {
+    const endDate = new Date(this.startTime);
+    endDate.setTime(endDate.getTime() + this.duration * 60 * 60 * 1000);
+    return endDate;
+  }
+
   validate(): void {
     if (this.duration < 0) {
       throw new Error("Duration cannot be negative");
@@ -37,11 +43,6 @@ export class TaskInstance {
     if (this.startTime === null) {
       throw new Error("Start time cannot be null");
     }
-  }
-  getEndDate(): Date {
-    const endDate = new Date(this.startTime);
-    endDate.setTime(endDate.getTime() + this.duration * 60 * 60 * 1000);
-    return endDate;
   }
 
   assignNewSoldier(soldier: Soldier, roleIndex: number): void {
