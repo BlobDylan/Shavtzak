@@ -37,6 +37,7 @@ export type CompanyContextType = {
     soldier: Soldier,
     taskInstance: TaskInstance
   ) => number;
+  clearMissionDayTaskInstances: (misisonDay: MissionDay) => void;
 };
 
 const CompanyContext = createContext<CompanyContextType | null>(null);
@@ -55,7 +56,12 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const parsedSoldiers: Soldier[] = [];
     for (let soldier of predefinedSoldiers) {
-      soldier = new Soldier(soldier.platoon, soldier.name, soldier.roles);
+      soldier = new Soldier(
+        soldier.platoon,
+        soldier.name,
+        soldier.roles,
+        soldier.limitedTaskTypes
+      );
       parsedSoldiers.push(soldier);
     }
 
@@ -114,6 +120,14 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       );
   };
 
+  const clearMissionDayTaskInstances = (missionDay: MissionDay): void => {
+    const missionDayTaskInstances =
+      company.getRelevantTaskInstances(missionDay);
+    company.taskInstances = company.taskInstances.filter((ti) => {
+      return !missionDayTaskInstances.includes(ti);
+    });
+  };
+
   const generateDefaultTasks = (missionDay: MissionDay): void => {
     if (company.getRelevantTaskInstances(missionDay).length > 0) {
       // Skip generation because mission day already was generated with some task instances
@@ -159,10 +173,18 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     taskInstance: TaskInstance,
     roleIndex: number,
     soldiers: Soldier[],
-    organicPlatoonNum: number
+    organicPlatoonNum: number | null
   ) => {
     for (const soldier of soldiers) {
-      // enforce organicity if required
+      // Skip soldiers that are unable to perform this task
+      if (
+        soldier.limitedTaskTypes.length > 0 &&
+        !soldier.limitedTaskTypes.includes(taskInstance.task.type)
+      ) {
+        continue;
+      }
+
+      // Enforce organicity if required
       if (
         taskInstance.task.isRequireOrganicity &&
         soldier.platoon !== organicPlatoonNum
@@ -170,6 +192,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         continue;
       }
 
+      // Select only soldiers that have the needed roles for this task
       if (soldier.roles.includes(taskInstance.task.roles[roleIndex])) {
         return soldier;
       }
@@ -276,10 +299,13 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       });
     });
 
-    const organicPlatoonNum = calculateOptimalOrganicPlatoonNum(
-      taskInstance,
-      sortedSoldiers
-    );
+    let organicPlatoonNum: number | null = null;
+    if (taskInstance.task.isRequireOrganicity) {
+      organicPlatoonNum = calculateOptimalOrganicPlatoonNum(
+        taskInstance,
+        sortedSoldiers
+      );
+    }
     for (let i = 0; i < taskInstance.task.roles.length; i++) {
       // Skip already roles that have already been manually assigned
       if (taskInstance.assignedSoldiers[i]) {
@@ -356,6 +382,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         getUniqueTasks,
         getSortedSoldiers,
         timeSinceLastMission,
+        clearMissionDayTaskInstances,
       }}
     >
       {children}

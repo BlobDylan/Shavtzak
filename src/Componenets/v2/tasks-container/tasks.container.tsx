@@ -284,6 +284,15 @@ function TasksContainer() {
           >
             Toggle exceptions select
           </Button>
+          <Button
+            sx={{ backgroundColor: "primary.main" }}
+            onClick={() => {
+              companyContext.clearMissionDayTaskInstances(currentMissionDay);
+              setCurrentMissionDayTaskInstances([]);
+            }}
+          >
+            Clear current mission day data
+          </Button>
         </Box>
         {!shouldShowExceptions && (
           <>
