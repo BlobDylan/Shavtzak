@@ -286,9 +286,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     missionDay: MissionDay
   ) => {
     // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
-    if (taskInstance.task.type == TaskType.KK_B) {
-      return;
-    }
 
     let sortedSoldiers = getSortedSoldiers(taskInstance);
 
