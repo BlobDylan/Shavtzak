@@ -44,86 +44,50 @@ const DisplayTasksSummary: FC<{ missionDay: MissionDay }> = ({
   const uniqueTasks = companyContext.getUniqueTasks();
   return (
     <>
+      <TableContainer component={Paper}>
+        <Typography align="center" marginTop={1} variant="h5">
+          תורנים
+        </Typography>
+        <Table sx={{ minWidth: 800 }} aria-label="simple table">
+          <TableHead>
+            <TableRow>
+              <TableCell variant="head" align="center">
+                <Typography>חובש תורן</Typography>
+              </TableCell>
+              <TableCell variant="head" align="center">
+                <Typography>קצין מוצב</Typography>
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            <TableRow>
+              <TableCell
+                sx={{
+                  backgroundColor: "text.primary",
+                  color: "black",
+                }}
+                size="small"
+                align="center"
+              >
+                <Typography>דביר גזאלה</Typography>
+              </TableCell>
+              <TableCell
+                sx={{
+                  backgroundColor: "text.primary",
+                  color: "black",
+                }}
+                size="small"
+                align="center"
+              >
+                <Typography>דביר גזאלה</Typography>
+              </TableCell>
+            </TableRow>
+          </TableBody>
+        </Table>
+      </TableContainer>
       {uniqueTasks.map((task: TaskModel, index) => (
         <DisplayTaskSummary task={task} key={index} missionDay={missionDay} />
       ))}
-      {/* <TableContainer component={Paper}>
-      <Typography align="center" marginTop={1} variant="h5">
-      </Typography>
-      <Table sx={{ minWidth: 800 }} aria-label="simple table">
-        <TableHead>
-          <TableRow>
-            {task.roles.map((role: any, index) => (
-              <TableCell key={index} variant="head" align="center">
-                <Typography>{role}</Typography>
-              </TableCell>
-            ))}
-            {(task.type === TaskType.PATROL || task.type === TaskType.KK_A) && (
-              <TableCell variant="head" align="center">
-                <Typography>נהג</Typography>
-              </TableCell>
-            )}
-            <TableCell variant="head" align="center" width={"12%"}>
-              <Typography>שעות</Typography>
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {taskinstances.map(
-            (taskInstance: TaskInstance, index) =>
-              taskInstance.task.type === task.type && (
-                <TableRow key={index}>
-                  {taskInstance.assignedSoldiers.map(
-                    (soldier: Soldier, index) => (
-                      <TableCell
-                        key={index}
-                        sx={{
-                          backgroundColor: platoonColors[soldier.platoon],
-                          color: "black",
-                        }}
-                        size="small"
-                        align="center"
-                      >
-                        <Typography>{soldier.name}</Typography>
-                      </TableCell>
-                    )
-                  )}
-                  {(task.type === TaskType.PATROL ||
-                    task.type === TaskType.KK_A) && (
-                    <TableCell
-                      sx={{
-                        backgroundColor: "#FFBFBF",
-                        color: "black",
-                      }}
-                      size="small"
-                      align="center"
-                    >
-                      <Typography>קו</Typography>
-                    </TableCell>
-                  )}
-                  <TableCell
-                    sx={{
-                      backgroundColor: "text.primary",
-                      color: "black",
-                    }}
-                    size="small"
-                    align="right"
-                  >
-                    <Typography>
-                      {` ${toReadableHourAndMinutes(
-                        new Date(
-                          taskInstance.startTime.getTime() +
-                            taskInstance.duration * 60 * 60 * 1000
-                        )
-                      )} - ${toReadableHourAndMinutes(taskInstance.startTime)}`}
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )
-          )}
-        </TableBody>
-      </Table>
-    </TableContainer> */}
     </>
   );
 };
