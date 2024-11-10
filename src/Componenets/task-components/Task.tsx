@@ -1,21 +1,13 @@
 import type { FC } from "react";
-import {
-  Box,
-  Typography,
-  Stack,
-  Menu,
-  MenuItem,
-  Button,
-} from "@mui/material";
+import { Box, Typography, Stack, Menu, MenuItem, Button } from "@mui/material";
 import { TaskInstance } from "../shared/Task.model";
 import {
   useCompanyContext,
   CompanyContextType,
 } from "../../contexts/Company.ctx";
-import { useState} from "react";
+import { useState } from "react";
 import { Soldier } from "../shared/Soldier.model";
 import { toReadableHourAndMinutes } from "../../contexts/helpers";
-
 
 export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
   const companyContext = useCompanyContext() as CompanyContextType;
@@ -44,12 +36,12 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
       <Stack direction={"column"} display={"flex"} alignItems={"center"}>
         <Typography variant={"body1"} color="white" marginTop={2}>
           <span dir="rtl">
-            {
-              `${taskInstance.task.type} ${toReadableHourAndMinutes(new Date(
+            {`${taskInstance.task.type} ${toReadableHourAndMinutes(
+              new Date(
                 taskInstance.startTime.getTime() +
                   taskInstance.duration * 60 * 60 * 1000
-              ))} - ${toReadableHourAndMinutes(taskInstance.startTime)}`
-            }
+              )
+            )} - ${toReadableHourAndMinutes(taskInstance.startTime)}`}
           </span>
         </Typography>
         <Stack direction={"row"} spacing={2} margin={2} marginBottom={3}>
@@ -112,12 +104,35 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                   }}
                 >
                   {(
-                    companyContext.company.soldiers.filter((soldier) =>
-                      soldier.roles.includes(role)
-                    ) as any[]
+                    companyContext
+                      .getSortedSoldiers(taskInstance)
+                      .filter((soldier) =>
+                        soldier.roles.includes(role)
+                      ) as any[]
                   ).map((soldier, index) => (
-                    <MenuItem key={index} onClick={() => handleClose(soldier)}>
-                      <Typography width={"80px"}>{soldier.name}</Typography>
+                    <MenuItem
+                      sx={{ width: "140px" }}
+                      key={index}
+                      onClick={() => handleClose(soldier)}
+                    >
+                      <Stack>
+                        <Typography width={"80px"}>{soldier.name}</Typography>
+                        <Box flexGrow={1}></Box>
+                        <Typography width={"80px"}>
+                          {Math.round(
+                            Math.min(
+                              companyContext.timeSinceLastMission(
+                                soldier,
+                                taskInstance
+                              ),
+                              24 * 60 * 60 * 1000
+                            ) /
+                              1000 /
+                              60 /
+                              60
+                          ) + "h"}
+                        </Typography>
+                      </Stack>
                     </MenuItem>
                   ))}
                 </Menu>

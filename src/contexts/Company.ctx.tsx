@@ -32,6 +32,11 @@ export type CompanyContextType = {
   generateDefaultTasks: (missionDay: MissionDay) => void;
   generateAssignments: (missionDay: MissionDay) => void;
   getUniqueTasks: () => Task[];
+  getSortedSoldiers: (taskInstance: TaskInstance) => Soldier[];
+  timeSinceLastMission: (
+    soldier: Soldier,
+    taskInstance: TaskInstance
+  ) => number;
   clearMissionDayTaskInstances: (misisonDay: MissionDay) => void;
 };
 
@@ -51,7 +56,12 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
     const parsedSoldiers: Soldier[] = [];
     for (let soldier of predefinedSoldiers) {
-      soldier = new Soldier(soldier.platoon, soldier.name, soldier.roles, soldier.limitedTaskTypes);
+      soldier = new Soldier(
+        soldier.platoon,
+        soldier.name,
+        soldier.roles,
+        soldier.limitedTaskTypes
+      );
       parsedSoldiers.push(soldier);
     }
 
@@ -111,9 +121,12 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const clearMissionDayTaskInstances = (missionDay: MissionDay): void => {
-    const missionDayTaskInstances = company.getRelevantTaskInstances(missionDay);
-    company.taskInstances = company.taskInstances.filter((ti) => { return !missionDayTaskInstances.includes(ti) });
-  }
+    const missionDayTaskInstances =
+      company.getRelevantTaskInstances(missionDay);
+    company.taskInstances = company.taskInstances.filter((ti) => {
+      return !missionDayTaskInstances.includes(ti);
+    });
+  };
 
   const generateDefaultTasks = (missionDay: MissionDay): void => {
     if (company.getRelevantTaskInstances(missionDay).length > 0) {
@@ -164,7 +177,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   ) => {
     for (const soldier of soldiers) {
       // Skip soldiers that are unable to perform this task
-      if (soldier.limitedTaskTypes.length > 0 && !soldier.limitedTaskTypes.includes(taskInstance.task.type)){
+      if (
+        soldier.limitedTaskTypes.length > 0 &&
+        !soldier.limitedTaskTypes.includes(taskInstance.task.type)
+      ) {
         continue;
       }
 
@@ -256,17 +272,22 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     return platoonSquad;
   };
 
-  const generateAssignmentForTaskInstance = (
-    taskInstance: TaskInstance,
-    missionDay: MissionDay
-  ) => {
-    // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
-    let sortedSoldiers = company.soldiers.sort((s1, s2) => {
+  const getSortedSoldiers = (taskInstance: TaskInstance): Soldier[] => {
+    return company.soldiers.sort((s1, s2) => {
       return (
         timeSinceLastMission(s2, taskInstance) -
         timeSinceLastMission(s1, taskInstance)
       );
     });
+  };
+
+  const generateAssignmentForTaskInstance = (
+    taskInstance: TaskInstance,
+    missionDay: MissionDay
+  ) => {
+    // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
+
+    let sortedSoldiers = getSortedSoldiers(taskInstance);
 
     // Remove excluded soldiers from the list
     sortedSoldiers = sortedSoldiers.filter((soldier) => {
@@ -356,6 +377,8 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         generateDefaultTasks,
         generateAssignments,
         getUniqueTasks,
+        getSortedSoldiers,
+        timeSinceLastMission,
         clearMissionDayTaskInstances,
       }}
     >
