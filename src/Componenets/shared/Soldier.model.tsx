@@ -1,11 +1,16 @@
 import { SoldierRole } from "./SoldierRole.enum";
+import { TaskType } from "./TaskType.enum";
 
 export class Soldier {
   name: string;
   platoon: number;
   roles: SoldierRole[];
+  limitedTaskTypes: TaskType[] = [];
 
-  constructor(platoon: number, name: string, roles: SoldierRole[] | null) {
+  constructor(platoon: number, name: string, roles: SoldierRole[] | null, limitedTaskTypes: TaskType[] | null = null) {
+    if (limitedTaskTypes) {
+      this.limitedTaskTypes = limitedTaskTypes;
+    }
     this.platoon = platoon;
     this.roles = roles || [];
     this.name = name;
