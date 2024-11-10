@@ -32,6 +32,11 @@ export type CompanyContextType = {
   generateDefaultTasks: (missionDay: MissionDay) => void;
   generateAssignments: (missionDay: MissionDay) => void;
   getUniqueTasks: () => Task[];
+  getSortedSoldiers: (taskInstance: TaskInstance) => Soldier[];
+  timeSinceLastMission: (
+    soldier: Soldier,
+    taskInstance: TaskInstance
+  ) => number;
 };
 
 const CompanyContext = createContext<CompanyContextType | null>(null);
@@ -244,17 +249,25 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     return platoonSquad;
   };
 
-  const generateAssignmentForTaskInstance = (
-    taskInstance: TaskInstance,
-    missionDay: MissionDay
-  ) => {
-    // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
-    let sortedSoldiers = company.soldiers.sort((s1, s2) => {
+  const getSortedSoldiers = (taskInstance: TaskInstance): Soldier[] => {
+    return company.soldiers.sort((s1, s2) => {
       return (
         timeSinceLastMission(s2, taskInstance) -
         timeSinceLastMission(s1, taskInstance)
       );
     });
+  };
+
+  const generateAssignmentForTaskInstance = (
+    taskInstance: TaskInstance,
+    missionDay: MissionDay
+  ) => {
+    // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
+    if (taskInstance.task.type == TaskType.KK_B) {
+      return;
+    }
+
+    let sortedSoldiers = getSortedSoldiers(taskInstance);
 
     // Remove excluded soldiers from the list
     sortedSoldiers = sortedSoldiers.filter((soldier) => {
@@ -341,6 +354,8 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         generateDefaultTasks,
         generateAssignments,
         getUniqueTasks,
+        getSortedSoldiers,
+        timeSinceLastMission,
       }}
     >
       {children}

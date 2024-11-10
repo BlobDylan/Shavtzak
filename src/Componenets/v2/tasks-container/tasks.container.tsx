@@ -17,11 +17,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
 } from "@mui/material";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -39,6 +34,7 @@ import { Task as TaskModel } from "../../shared/Task.model";
 import "./tasks.container.scss";
 import ExceptionsComponent from "./exceptions-component/exceptions.component";
 import { Soldier } from "../../shared/Soldier.model";
+import { TaskType } from "../../shared/TaskType.enum";
 
 const DisplayTasksSummary: FC<{ missionDay: MissionDay }> = ({
   missionDay,
@@ -51,6 +47,83 @@ const DisplayTasksSummary: FC<{ missionDay: MissionDay }> = ({
       {uniqueTasks.map((task: TaskModel, index) => (
         <DisplayTaskSummary task={task} key={index} missionDay={missionDay} />
       ))}
+      {/* <TableContainer component={Paper}>
+      <Typography align="center" marginTop={1} variant="h5">
+      </Typography>
+      <Table sx={{ minWidth: 800 }} aria-label="simple table">
+        <TableHead>
+          <TableRow>
+            {task.roles.map((role: any, index) => (
+              <TableCell key={index} variant="head" align="center">
+                <Typography>{role}</Typography>
+              </TableCell>
+            ))}
+            {(task.type === TaskType.PATROL || task.type === TaskType.KK_A) && (
+              <TableCell variant="head" align="center">
+                <Typography>נהג</Typography>
+              </TableCell>
+            )}
+            <TableCell variant="head" align="center" width={"12%"}>
+              <Typography>שעות</Typography>
+            </TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {taskinstances.map(
+            (taskInstance: TaskInstance, index) =>
+              taskInstance.task.type === task.type && (
+                <TableRow key={index}>
+                  {taskInstance.assignedSoldiers.map(
+                    (soldier: Soldier, index) => (
+                      <TableCell
+                        key={index}
+                        sx={{
+                          backgroundColor: platoonColors[soldier.platoon],
+                          color: "black",
+                        }}
+                        size="small"
+                        align="center"
+                      >
+                        <Typography>{soldier.name}</Typography>
+                      </TableCell>
+                    )
+                  )}
+                  {(task.type === TaskType.PATROL ||
+                    task.type === TaskType.KK_A) && (
+                    <TableCell
+                      sx={{
+                        backgroundColor: "#FFBFBF",
+                        color: "black",
+                      }}
+                      size="small"
+                      align="center"
+                    >
+                      <Typography>קו</Typography>
+                    </TableCell>
+                  )}
+                  <TableCell
+                    sx={{
+                      backgroundColor: "text.primary",
+                      color: "black",
+                    }}
+                    size="small"
+                    align="right"
+                  >
+                    <Typography>
+                      {` ${toReadableHourAndMinutes(
+                        new Date(
+                          taskInstance.startTime.getTime() +
+                            taskInstance.duration * 60 * 60 * 1000
+                        )
+                      )} - ${toReadableHourAndMinutes(taskInstance.startTime)}`}
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              )
+          )}
+        </TableBody>
+      </Table>
+    </TableContainer> */}
     </>
   );
 };
@@ -84,6 +157,11 @@ const DisplayTaskSummary: FC<{ task: TaskModel; missionDay: MissionDay }> = ({
                 <Typography>{role}</Typography>
               </TableCell>
             ))}
+            {(task.type === TaskType.PATROL || task.type === TaskType.KK_A) && (
+              <TableCell variant="head" align="center">
+                <Typography>נהג</Typography>
+              </TableCell>
+            )}
             <TableCell variant="head" align="center" width={"12%"}>
               <Typography>שעות</Typography>
             </TableCell>
@@ -108,6 +186,19 @@ const DisplayTaskSummary: FC<{ task: TaskModel; missionDay: MissionDay }> = ({
                         <Typography>{soldier.name}</Typography>
                       </TableCell>
                     )
+                  )}
+                  {(task.type === TaskType.PATROL ||
+                    task.type === TaskType.KK_A) && (
+                    <TableCell
+                      sx={{
+                        backgroundColor: "#FFBFBF",
+                        color: "black",
+                      }}
+                      size="small"
+                      align="center"
+                    >
+                      <Typography>קו</Typography>
+                    </TableCell>
                   )}
                   <TableCell
                     sx={{
@@ -209,7 +300,7 @@ function TasksContainer() {
         flexDirection={"column"}
         alignItems={"center"}
         sx={{ padding: "1rem" }}
-        width="100%"
+        width="80%"
       >
         <Typography variant="h4">Tasks</Typography>
         <Typography variant="h6">
