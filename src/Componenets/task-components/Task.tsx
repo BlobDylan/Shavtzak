@@ -1,5 +1,13 @@
 import type { FC } from "react";
-import { Box, Typography, Stack, Menu, MenuItem, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Stack,
+  Menu,
+  MenuItem,
+  Button,
+  Tooltip,
+} from "@mui/material";
 import { TaskInstance } from "../shared/Task.model";
 import {
   useCompanyContext,
@@ -48,41 +56,66 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                 taskInstance
               );
             };
-
+            let toolTipText = "לא משוייך למשימה";
+            if (
+              taskInstance.assignedSoldiers[index] !== undefined &&
+              taskInstance.assignedSoldiers[index] !== null
+            ) {
+              toolTipText =
+                Math.round(
+                  Math.min(
+                    companyContext.timeSinceLastMission(
+                      taskInstance.assignedSoldiers[index],
+                      taskInstance
+                    ),
+                    100 * 60 * 60 * 1000
+                  ) /
+                    1000 /
+                    60 /
+                    60
+                ) +
+                " " +
+                (companyContext.getLastTaskInstance(
+                  taskInstance.assignedSoldiers[index],
+                  taskInstance
+                )?.task?.type ?? "לא שובץ לאחרונה");
+            }
             return (
               <Stack key={index + role}>
-                <Button
-                  id="demo-positioned-button"
-                  aria-controls={open ? "demo-positioned-menu" : undefined}
-                  aria-haspopup="true"
-                  aria-expanded={open ? "true" : undefined}
-                  key={index}
-                  sx={{
-                    width: "150px",
-                    height: "25px",
-                    border: "3px solid white",
-                    blackborderRadius: "5px",
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "12px",
-                    backgroundColor:
-                      platoonColors[
-                        taskInstance.assignedSoldiers[index] === undefined ||
-                        taskInstance.assignedSoldiers[index] === null
-                          ? 4
-                          : taskInstance.assignedSoldiers[index].platoon
-                      ] ?? "primary.main",
-                  }}
-                  onClick={handleClick}
-                >
-                  {!taskInstance.assignedSoldiers[index] && role}
-                  <Typography color={"black"}>
-                    {taskInstance.assignedSoldiers[index] &&
-                      taskInstance.assignedSoldiers[index].name}
-                  </Typography>
-                </Button>
+                <Tooltip title={toolTipText} placement="top">
+                  <Button
+                    id="demo-positioned-button"
+                    aria-controls={open ? "demo-positioned-menu" : undefined}
+                    aria-haspopup="true"
+                    aria-expanded={open ? "true" : undefined}
+                    key={index}
+                    sx={{
+                      width: "150px",
+                      height: "25px",
+                      border: "3px solid white",
+                      blackborderRadius: "5px",
+                      display: "flex",
+                      flexDirection: "column",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: "12px",
+                      backgroundColor:
+                        platoonColors[
+                          taskInstance.assignedSoldiers[index] === undefined ||
+                          taskInstance.assignedSoldiers[index] === null
+                            ? 4
+                            : taskInstance.assignedSoldiers[index].platoon
+                        ] ?? "primary.main",
+                    }}
+                    onClick={handleClick}
+                  >
+                    {!taskInstance.assignedSoldiers[index] && role}
+                    <Typography color={"black"}>
+                      {taskInstance.assignedSoldiers[index] &&
+                        taskInstance.assignedSoldiers[index].name}
+                    </Typography>
+                  </Button>
+                </Tooltip>
                 <Menu
                   id="demo-positioned-menu"
                   aria-labelledby="demo-positioned-button"
