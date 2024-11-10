@@ -38,6 +38,10 @@ export type CompanyContextType = {
     taskInstance: TaskInstance
   ) => number;
   clearMissionDayTaskInstances: (misisonDay: MissionDay) => void;
+  getLastTaskInstance: (
+    soldier: Soldier,
+    taskInstance: TaskInstance
+  ) => TaskInstance | null;
 };
 
 const CompanyContext = createContext<CompanyContextType | null>(null);
@@ -338,12 +342,14 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       enqueueSnackbar(String(error), { variant: "error" });
     }
   };
-
-  const timeSinceLastMission = (
+  const getLastTaskInstance = (
     soldier: Soldier,
     taskInstance: TaskInstance
-  ): number => {
+  ): TaskInstance | null => {
     const sortedTaskInstancesHistory = company.taskInstances
+      .filter((ti) => {
+        return ti !== taskInstance;
+      })
       .filter((ti) => {
         return ti.assignedSoldiers.some((s) => {
           return s?.name === soldier.name;
@@ -356,9 +362,21 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         return b.getEndDate().getTime() - a.getEndDate().getTime();
       });
     if (sortedTaskInstancesHistory.length > 0) {
+      return sortedTaskInstancesHistory[0];
+    }
+
+    return null;
+  };
+
+  const timeSinceLastMission = (
+    soldier: Soldier,
+    taskInstance: TaskInstance
+  ): number => {
+    const lastTaskInstance = getLastTaskInstance(soldier, taskInstance);
+    if (lastTaskInstance !== null) {
       return (
-        taskInstance.getEndDate().getTime() -
-        sortedTaskInstancesHistory[0].getEndDate().getTime()
+        taskInstance.startTime.getTime() -
+        lastTaskInstance.getEndDate().getTime()
       );
     }
 
@@ -380,6 +398,7 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
         getSortedSoldiers,
         timeSinceLastMission,
         clearMissionDayTaskInstances,
+        getLastTaskInstance,
       }}
     >
       {children}
