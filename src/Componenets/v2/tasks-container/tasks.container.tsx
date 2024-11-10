@@ -17,6 +17,11 @@ import {
   TableHead,
   TableRow,
   Paper,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 
 import CloseIcon from "@mui/icons-material/Close";
@@ -34,7 +39,6 @@ import { Task as TaskModel } from "../../shared/Task.model";
 import "./tasks.container.scss";
 import ExceptionsComponent from "./exceptions-component/exceptions.component";
 import { Soldier } from "../../shared/Soldier.model";
-import { TaskType } from "../../shared/TaskType.enum";
 
 const DisplayTasksSummary: FC<{ missionDay: MissionDay }> = ({
   missionDay,
@@ -44,47 +48,6 @@ const DisplayTasksSummary: FC<{ missionDay: MissionDay }> = ({
   const uniqueTasks = companyContext.getUniqueTasks();
   return (
     <>
-      <TableContainer component={Paper}>
-        <Typography align="center" marginTop={1} variant="h5">
-          תורנים
-        </Typography>
-        <Table sx={{ minWidth: 800 }} aria-label="simple table">
-          <TableHead>
-            <TableRow>
-              <TableCell variant="head" align="center">
-                <Typography>חובש תורן</Typography>
-              </TableCell>
-              <TableCell variant="head" align="center">
-                <Typography>קצין מוצב</Typography>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell
-                sx={{
-                  backgroundColor: "text.primary",
-                  color: "black",
-                }}
-                size="small"
-                align="center"
-              >
-                <Typography>דביר גזאלה</Typography>
-              </TableCell>
-              <TableCell
-                sx={{
-                  backgroundColor: "text.primary",
-                  color: "black",
-                }}
-                size="small"
-                align="center"
-              >
-                <Typography>דביר גזאלה</Typography>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
       {uniqueTasks.map((task: TaskModel, index) => (
         <DisplayTaskSummary task={task} key={index} missionDay={missionDay} />
       ))}
@@ -121,11 +84,6 @@ const DisplayTaskSummary: FC<{ task: TaskModel; missionDay: MissionDay }> = ({
                 <Typography>{role}</Typography>
               </TableCell>
             ))}
-            {(task.type === TaskType.PATROL || task.type === TaskType.KK_A) && (
-              <TableCell variant="head" align="center">
-                <Typography>נהג</Typography>
-              </TableCell>
-            )}
             <TableCell variant="head" align="center" width={"12%"}>
               <Typography>שעות</Typography>
             </TableCell>
@@ -150,19 +108,6 @@ const DisplayTaskSummary: FC<{ task: TaskModel; missionDay: MissionDay }> = ({
                         <Typography>{soldier.name}</Typography>
                       </TableCell>
                     )
-                  )}
-                  {(task.type === TaskType.PATROL ||
-                    task.type === TaskType.KK_A) && (
-                    <TableCell
-                      sx={{
-                        backgroundColor: "#FFBFBF",
-                        color: "black",
-                      }}
-                      size="small"
-                      align="center"
-                    >
-                      <Typography>קו</Typography>
-                    </TableCell>
                   )}
                   <TableCell
                     sx={{
@@ -264,7 +209,7 @@ function TasksContainer() {
         flexDirection={"column"}
         alignItems={"center"}
         sx={{ padding: "1rem" }}
-        width="80%"
+        width="100%"
       >
         <Typography variant="h4">Tasks</Typography>
         <Typography variant="h6">

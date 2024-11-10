@@ -5,7 +5,5 @@ export enum SoldierRole {
   SHARPSHOOTER = "קלע",
   COMMANDER = "מפקד",
   DRIVER = "נהג",
-  MEDIC = "חובש",
-  KTORAN = "קצין תורן",
-  CHTORAN = "חובש תורן",
+  MEDIC = "חובש"
 }
