@@ -30,28 +30,17 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
     <Box
       sx={{
         width: "100%",
-        height: "100px",
-        margin: 2,
+        height: "50px",
+        margin: 0,
         backgroundColor: "primary.main",
         borderRadius: "10px",
         boxShadow: 3,
         display: "flex",
         flexDirection: "row",
-        alignItems: "center",
         justifyContent: "space-around",
       }}
     >
-      <Stack direction={"column"} display={"flex"} alignItems={"center"}>
-        <Typography variant={"body1"} color="white" marginTop={2}>
-          <span dir="rtl">
-            {`${taskInstance.task.type} ${toReadableHourAndMinutes(
-              new Date(
-                taskInstance.startTime.getTime() +
-                  taskInstance.duration * 60 * 60 * 1000
-              )
-            )} - ${toReadableHourAndMinutes(taskInstance.startTime)}`}
-          </span>
-        </Typography>
+      <Stack direction={"row"} display={"flex"}>
         <Stack direction={"row"} spacing={2} margin={2} marginBottom={3}>
           {taskInstance.task.roles.map((role, index) => {
             const [anchorEl, setAnchorEl] = useState(null);
@@ -144,27 +133,27 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                       ) as any[]
                   ).map((soldier, index) => (
                     <MenuItem
-                      sx={{ width: "140px" }}
+                      sx={{ width: "100%" }}
                       key={index}
                       onClick={() => handleClose(soldier)}
                     >
-                      <Stack>
-                        <Typography width={"80px"}>{soldier.name}</Typography>
-                        <Box flexGrow={1}></Box>
-                        <Typography width={"80px"}>
+                      <Stack direction={"row"} spacing={1}>
+                        <Typography width={"100%"}>
                           {Math.round(
                             Math.min(
                               companyContext.timeSinceLastMission(
                                 soldier,
                                 taskInstance
                               ),
-                              24 * 60 * 60 * 1000
+                              100 * 60 * 60 * 1000
                             ) /
                               1000 /
                               60 /
                               60
-                          ) + "h"}
+                          )}
                         </Typography>
+                        <Typography width={"100%"}>{soldier.name}</Typography>
+                        <Box flexGrow={1}></Box>
                       </Stack>
                     </MenuItem>
                   ))}
@@ -173,6 +162,16 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
             );
           })}
         </Stack>
+        <Typography variant={"body1"} color="white" marginTop={2}>
+          <span dir="rtl">
+            {`${taskInstance.task.type} ${toReadableHourAndMinutes(
+              new Date(
+                taskInstance.startTime.getTime() +
+                  taskInstance.duration * 60 * 60 * 1000
+              )
+            )} - ${toReadableHourAndMinutes(taskInstance.startTime)}`}
+          </span>
+        </Typography>
       </Stack>
     </Box>
   );

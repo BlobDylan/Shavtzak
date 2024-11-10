@@ -355,9 +355,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
           return s?.name === soldier.name;
         });
       })
-      .filter((ti) => {
-        return ti.startTime.getTime() <= taskInstance.startTime.getTime();
-      })
       .sort((a, b) => {
         return b.getEndDate().getTime() - a.getEndDate().getTime();
       });
