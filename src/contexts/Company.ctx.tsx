@@ -349,15 +349,15 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
           return s?.name === soldier.name;
         });
       })
-      .filter((ti) => {
-        return ti.startTime.getTime() <= taskInstance.startTime.getTime();
-      })
+      // .filter((ti) => {
+      //   return ti.startTime.getTime() <= taskInstance.startTime.getTime();
+      // })
       .sort((a, b) => {
         return b.getEndDate().getTime() - a.getEndDate().getTime();
       });
     if (sortedTaskInstancesHistory.length > 0) {
       return (
-        taskInstance.getEndDate().getTime() -
+        taskInstance.startTime.getTime() -
         sortedTaskInstancesHistory[0].getEndDate().getTime()
       );
     }
