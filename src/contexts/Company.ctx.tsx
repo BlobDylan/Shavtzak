@@ -73,7 +73,8 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     for (let taskInstance of storedCompanyData.taskInstances ?? []) {
       const taskInstanceTask = new Task(
         taskInstance.task.type,
-        taskInstance.task.roles
+        taskInstance.task.roles,
+        taskInstance.task.isRequireOrganicity
       );
       const parsedTaskInstance = new TaskInstance(
         taskInstanceTask,
@@ -290,7 +291,6 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     missionDay: MissionDay
   ) => {
     // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
-
     let sortedSoldiers = getSortedSoldiers(taskInstance);
 
     // Remove excluded soldiers from the list
@@ -301,7 +301,9 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     });
 
     let organicPlatoonNum: number | null = null;
+    debugger;
     if (taskInstance.task.isRequireOrganicity) {
+      debugger;
       organicPlatoonNum = calculateOptimalOrganicPlatoonNum(
         taskInstance,
         sortedSoldiers
@@ -344,9 +346,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   };
   const getLastTaskInstance = (
     soldier: Soldier,
-    taskInstance: TaskInstance
+    taskInstance: TaskInstance,
+    shouldFilterFutureTasks: boolean = false,
   ): TaskInstance | null => {
-    const sortedTaskInstancesHistory = company.taskInstances
+    let sortedTaskInstancesHistory = company.taskInstances
       .filter((ti) => {
         return ti !== taskInstance;
       })
@@ -358,6 +361,13 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       .sort((a, b) => {
         return b.getEndDate().getTime() - a.getEndDate().getTime();
       });
+
+      if (shouldFilterFutureTasks) {
+      sortedTaskInstancesHistory = sortedTaskInstancesHistory.filter((ti) => {
+        return shouldFilterFutureTasks && ti.startTime.getTime() <= taskInstance.startTime.getTime();
+      })
+    }
+
     if (sortedTaskInstancesHistory.length > 0) {
       return sortedTaskInstancesHistory[0];
     }
@@ -367,9 +377,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const timeSinceLastMission = (
     soldier: Soldier,
-    taskInstance: TaskInstance
+    taskInstance: TaskInstance,
+    shouldFilterFutureTasks: boolean = false
   ): number => {
-    const lastTaskInstance = getLastTaskInstance(soldier, taskInstance);
+    const lastTaskInstance = getLastTaskInstance(soldier, taskInstance, shouldFilterFutureTasks);
     if (lastTaskInstance !== null) {
       return (
         taskInstance.startTime.getTime() -
