@@ -73,7 +73,8 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     for (let taskInstance of storedCompanyData.taskInstances ?? []) {
       const taskInstanceTask = new Task(
         taskInstance.task.type,
-        taskInstance.task.roles
+        taskInstance.task.roles,
+        taskInstance.task.isRequireOrganicity
       );
       const parsedTaskInstance = new TaskInstance(
         taskInstanceTask,
@@ -233,13 +234,13 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
     }
     const platoonWithTheLongestTimeSinceLastMission = bestSquads.reduce(
       (prev, current) => {
-        return Math.min(
-          timeSinceLastMission(current[0], taskInstance),
-          timeSinceLastMission(current[1], taskInstance)
-        ) >
-          Math.min(
-            timeSinceLastMission(prev[0], taskInstance),
-            timeSinceLastMission(prev[1], taskInstance)
+        return Math.max(
+          sortedSoldiers.indexOf(current[0]),
+          sortedSoldiers.indexOf(current[1])
+        ) <
+          Math.max(
+            sortedSoldiers.indexOf(prev[0]),
+            sortedSoldiers.indexOf(prev[1])
           )
           ? current
           : prev;
@@ -277,21 +278,46 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   const getSortedSoldiers = (taskInstance: TaskInstance): Soldier[] => {
-    return company.soldiers.sort((s1, s2) => {
-      return (
-        timeSinceLastMission(s2, taskInstance) -
-        timeSinceLastMission(s1, taskInstance)
-      );
-    });
-  };
+    const soldiersCopy = structuredClone(company.soldiers);
+    soldiersCopy
+      // First sort by different tasks (prefer to mix tasks)
+      .sort((s1, s2) => {
+        let s1TaskType: TaskType | undefined = getLastTaskInstance(s1, taskInstance, true)?.task.type;
+        let s2TaskType: TaskType | undefined = getLastTaskInstance(s2, taskInstance, true)?.task.type;
+
+        if (s1TaskType === undefined) {
+          return -1;
+        }
+        if (s2TaskType === undefined) {
+          return 1;
+        }
+        if (s1TaskType === taskInstance.task.type) {
+          return 1;
+        }
+        if (s2TaskType === taskInstance.task.type) {
+          return -1;
+        }
+
+        return 0;
+      });
+    soldiersCopy
+      // Sort by time since last mission (Prefer higher time since last mission)
+      .sort((s1, s2) => {
+        return (
+          timeSinceLastMission(s2, taskInstance) -
+          timeSinceLastMission(s1, taskInstance)
+        );
+      });
+    return soldiersCopy;
+  }
 
   const generateAssignmentForTaskInstance = (
     taskInstance: TaskInstance,
     missionDay: MissionDay
-  ) => {
+    ) => {
     // Sort soldiers by time since last mission (first assign soldiers that have been idle the longest)
-
     let sortedSoldiers = getSortedSoldiers(taskInstance);
+    debugger;
 
     // Remove excluded soldiers from the list
     sortedSoldiers = sortedSoldiers.filter((soldier) => {
@@ -344,9 +370,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
   };
   const getLastTaskInstance = (
     soldier: Soldier,
-    taskInstance: TaskInstance
+    taskInstance: TaskInstance,
+    shouldFilterFutureTasks: boolean = false,
   ): TaskInstance | null => {
-    const sortedTaskInstancesHistory = company.taskInstances
+    let sortedTaskInstancesHistory = company.taskInstances
       .filter((ti) => {
         return ti !== taskInstance;
       })
@@ -358,6 +385,13 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
       .sort((a, b) => {
         return b.getEndDate().getTime() - a.getEndDate().getTime();
       });
+
+      if (shouldFilterFutureTasks) {
+      sortedTaskInstancesHistory = sortedTaskInstancesHistory.filter((ti) => {
+        return shouldFilterFutureTasks && ti.startTime.getTime() <= taskInstance.startTime.getTime();
+      })
+    }
+
     if (sortedTaskInstancesHistory.length > 0) {
       return sortedTaskInstancesHistory[0];
     }
@@ -367,9 +401,10 @@ const CompanyProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const timeSinceLastMission = (
     soldier: Soldier,
-    taskInstance: TaskInstance
+    taskInstance: TaskInstance,
+    shouldFilterFutureTasks: boolean = false
   ): number => {
-    const lastTaskInstance = getLastTaskInstance(soldier, taskInstance);
+    const lastTaskInstance = getLastTaskInstance(soldier, taskInstance, shouldFilterFutureTasks);
     if (lastTaskInstance !== null) {
       return (
         taskInstance.startTime.getTime() -

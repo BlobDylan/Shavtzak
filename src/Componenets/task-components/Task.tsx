@@ -66,7 +66,8 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                   Math.min(
                     companyContext.timeSinceLastMission(
                       taskInstance.assignedSoldiers[index],
-                      taskInstance
+                      taskInstance,
+                      true
                     ),
                     100 * 60 * 60 * 1000
                   ) /
@@ -77,7 +78,8 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                 " " +
                 (companyContext.getLastTaskInstance(
                   taskInstance.assignedSoldiers[index],
-                  taskInstance
+                  taskInstance,
+                  true
                 )?.task?.type ?? "לא שובץ לאחרונה");
             }
             return (
@@ -121,6 +123,7 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                   aria-labelledby="demo-positioned-button"
                   anchorEl={anchorEl}
                   open={open}
+                  dir="rtl"
                   onClose={() => {
                     setAnchorEl(null);
                   }}
@@ -133,17 +136,20 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                       ) as any[]
                   ).map((soldier, index) => (
                     <MenuItem
-                      sx={{ width: "100%" }}
+                      sx={{ width: "100%", background: platoonColors[soldier.platoon], color: "black" }}
                       key={index}
                       onClick={() => handleClose(soldier)}
                     >
                       <Stack direction={"row"} spacing={1}>
+                        <Typography>{" "}</Typography>
+                        <Typography width={"100%"}>{soldier.name}</Typography>
+                        <Typography>{" - "}</Typography>
                         <Typography width={"100%"}>
                           {Math.round(
                             Math.min(
                               companyContext.timeSinceLastMission(
                                 soldier,
-                                taskInstance
+                                taskInstance,
                               ),
                               100 * 60 * 60 * 1000
                             ) /
@@ -152,8 +158,6 @@ export const Task: FC<{ taskInstance: TaskInstance }> = ({ taskInstance }) => {
                               60
                           )}
                         </Typography>
-                        <Typography width={"100%"}>{soldier.name}</Typography>
-                        <Box flexGrow={1}></Box>
                       </Stack>
                     </MenuItem>
                   ))}
